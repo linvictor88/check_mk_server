@@ -1,0 +1,526 @@
+<<<check_mk>>>
+Version: 1.2.2p3
+AgentOS: linux
+PluginsDirectory: /usr/lib/check_mk_agent/plugins
+LocalDirectory: /usr/lib/check_mk_agent/local
+AgentDirectory: /etc/check_mk
+OnlyFrom: 
+<<<df>>>
+/dev/mapper/OpenStack-root ext4       283954808 38227164 231303580      15% /
+udev                       devtmpfs     4079076        4   4079072       1% /dev
+/dev/sda1                  ext2          233191    29249    191501      14% /boot
+<<<mounts>>>
+/dev/mapper/OpenStack-root / ext4 rw,relatime,errors=remount-ro,data=ordered 0 0
+/dev/sda1 /boot ext2 rw,relatime,errors=continue 0 0
+<<<ps>>>
+(root,24708,2488,0.0) /sbin/init
+(root,0,0,0.0) [kthreadd]
+(root,0,0,0.0) [ksoftirqd/0]
+(root,0,0,0.0) [migration/0]
+(root,0,0,0.0) [watchdog/0]
+(root,0,0,0.0) [migration/1]
+(root,0,0,0.0) [ksoftirqd/1]
+(root,0,0,0.0) [watchdog/1]
+(root,0,0,0.0) [migration/2]
+(root,0,0,0.0) [ksoftirqd/2]
+(root,0,0,0.0) [watchdog/2]
+(root,0,0,0.0) [migration/3]
+(root,0,0,0.0) [ksoftirqd/3]
+(root,0,0,0.0) [watchdog/3]
+(root,0,0,0.0) [migration/4]
+(root,0,0,0.0) [ksoftirqd/4]
+(root,0,0,0.0) [watchdog/4]
+(root,0,0,0.0) [migration/5]
+(root,0,0,0.0) [ksoftirqd/5]
+(root,0,0,0.0) [watchdog/5]
+(root,0,0,0.0) [migration/6]
+(root,0,0,0.0) [ksoftirqd/6]
+(root,0,0,0.0) [watchdog/6]
+(root,0,0,0.0) [migration/7]
+(root,0,0,0.0) [ksoftirqd/7]
+(root,0,0,0.0) [watchdog/7]
+(root,0,0,0.0) [cpuset]
+(root,0,0,0.0) [khelper]
+(root,0,0,0.0) [kdevtmpfs]
+(root,0,0,0.0) [netns]
+(root,0,0,0.0) [sync_supers]
+(root,0,0,0.0) [bdi-default]
+(root,0,0,0.0) [kintegrityd]
+(root,0,0,0.0) [kblockd]
+(root,0,0,0.0) [ata_sff]
+(root,0,0,0.0) [khubd]
+(root,0,0,0.0) [md]
+(root,0,0,0.0) [kworker/0:1]
+(root,0,0,0.0) [kworker/1:1]
+(root,0,0,0.0) [kworker/2:1]
+(root,0,0,0.0) [kworker/4:1]
+(root,0,0,0.0) [kworker/5:1]
+(root,0,0,0.0) [kworker/6:1]
+(root,0,0,0.0) [kworker/7:1]
+(root,0,0,0.0) [khungtaskd]
+(root,0,0,0.0) [kswapd0]
+(root,0,0,0.0) [ksmd]
+(root,0,0,0.0) [khugepaged]
+(root,0,0,0.0) [fsnotify_mark]
+(root,0,0,0.0) [ecryptfs-kthrea]
+(root,0,0,0.0) [crypto]
+(root,0,0,0.0) [kthrotld]
+(root,0,0,0.0) [scsi_eh_0]
+(root,0,0,0.0) [scsi_eh_1]
+(root,0,0,0.0) [scsi_eh_2]
+(root,0,0,0.0) [scsi_eh_3]
+(root,0,0,0.0) [binder]
+(root,0,0,0.0) [deferwq]
+(root,0,0,0.0) [charger_manager]
+(root,0,0,0.0) [devfreq_wq]
+(root,0,0,0.0) [kworker/6:2]
+(root,0,0,0.0) [kworker/7:2]
+(root,0,0,0.0) [kworker/5:2]
+(root,0,0,0.0) [mpt_poll_0]
+(root,0,0,0.0) [mpt/0]
+(root,0,0,0.0) [scsi_eh_4]
+(root,0,0,0.0) [kdmflush]
+(root,0,0,0.0) [kdmflush]
+(root,0,0,0.0) [jbd2/dm-0-8]
+(root,0,0,0.0) [ext4-dio-unwrit]
+(root,17232,508,0.0) upstart-udev-bridge --daemon
+(root,21756,960,0.0) /sbin/udevd --daemon
+(syslog,249472,1480,0.0) rsyslogd -c5
+(root,0,0,0.0) [kmpathd]
+(root,0,0,0.0) [kmpath_handlerd]
+(root,0,0,0.0) [kvm-irqfd-clean]
+(root,0,0,0.0) [kpsmoused]
+(102,25484,2344,0.0) dbus-daemon --system --fork --activation=upstart
+(root,21188,1540,0.0) /usr/sbin/bluetoothd
+(root,0,0,0.0) [edac-poller]
+(root,15188,524,0.0) upstart-socket-bridge --daemon
+(avahi,32304,1620,0.0) avahi-daemon: running [OpenStack.local]
+(avahi,32180,280,0.0) avahi-daemon: chroot helper
+(root,0,0,0.0) [iscsi_eh]
+(root,122432,4968,0.0) smbd -F
+(root,104152,3592,0.0) /usr/sbin/cupsd -F
+(root,0,0,0.0) [ttm_swap]
+(root,0,0,0.0) [ib_addr]
+(root,0,0,0.0) [krfcommd]
+(root,0,0,0.0) [ib_mcast]
+(root,0,0,0.0) [iw_cm_wq]
+(root,0,0,0.0) [ib_cm]
+(root,0,0,0.0) [rdma_cm]
+(root,4504,436,0.0) /sbin/iscsid
+(root,4996,2948,0.0) /sbin/iscsid
+(root,93324,1628,0.0) nmbd -D
+(root,23436,1024,0.0) /usr/sbin/vsftpd
+(root,122664,928,0.0) smbd -F
+(root,19052,816,0.0) /sbin/getty -8 38400 tty4
+(root,19052,816,0.0) /sbin/getty -8 38400 tty5
+(root,19052,816,0.0) /sbin/getty -8 38400 tty2
+(root,19052,816,0.0) /sbin/getty -8 38400 tty3
+(root,19052,816,0.0) /sbin/getty -8 38400 tty6
+(root,4460,568,0.0) acpid -c /etc/acpi/events -s /var/run/acpid.socket
+(root,15980,632,0.0) /usr/sbin/irqbalance
+(root,270664,3256,0.0) lightdm
+(mysql,2125984,200732,0.1) /usr/sbin/mysqld
+(root,19112,888,0.0) cron
+(daemon,16908,228,0.0) atd
+(root,17132,208,0.0) daemon --core --safe -n nicira-flow-stats-exporter -r -- /opt/nvp/bin/flow_stats_exporter --ovs-run-location=/var/run/openvswitch --log-file=/var/log/flow_stats_exporter/flow_stats_exporter.log --verbose=info
+(root,187528,3388,0.0) /opt/nvp/bin/flow_stats_exporter --ovs-run-location=/var/run/openvswitch --log-file=/var/log/flow_stats_exporter/flow_stats_exporter.log --verbose=info
+(root,22868,204,0.0) ovs-l3d: monitoring pid 1479 (healthy)                                                                                                                                                
+(root,22872,772,0.0) ovs-l3d punix:/var/run/openvswitch/ovs-l3d.mgmt -vANY:console:off --no-chdir --log-file=/var/log/openvswitch/ovs-l3d.log --pidfile=/var/run/openvswitch/ovs-l3d.pid --detach --monitor
+(root,13088,456,0.0) tgtd
+(root,13088,240,0.0) tgtd
+(whoopsie,204336,4284,0.0) whoopsie
+(root,0,0,0.0) [ovs_workq]
+(root,855468,7128,0.0) /usr/sbin/libvirtd -d
+(root,322792,129468,0.1) /usr/bin/X :0 -auth /var/run/lightdm/root/:0 -nolisten tcp vt7 -novtswitch -background none
+(root,22920,556,0.0) ovsdb-server: monitoring pid 1577 (healthy)                                                                                                                                                                                                                                                                                                                                                                                                         
+(root,23328,2788,0.0) ovsdb-server /etc/openvswitch/conf.db /etc/nicira-flow-stats-exporter/stats_config.db -vconsole:emer -vsyslog:err -vfile:info --remote=punix:/var/run/openvswitch/db.sock --private-key=db:Open_vSwitch,SSL,private_key --certificate=db:Open_vSwitch,SSL,certificate --bootstrap-ca-cert=db:Open_vSwitch,SSL,ca_cert --no-chdir --log-file=/var/log/openvswitch/ovsdb-server.log --pidfile=/var/run/openvswitch/ovsdb-server.pid --detach --monitor
+(root,23360,580,0.0) ovs-vswitchd: monitoring pid 1586 (healthy)                                                                                                                                                                                     
+(root,25000,8576,0.4) ovs-vswitchd unix:/var/run/openvswitch/db.sock -vconsole:emer -vsyslog:err -vfile:info --mlockall --no-chdir --log-file=/var/log/openvswitch/ovs-vswitchd.log --pidfile=/var/run/openvswitch/ovs-vswitchd.pid --detach --monitor
+(root,23364,1172,0.0) ovs-vswitchd: worker process for pid 1586                                                                                                                                                                                       
+(root,50032,2916,0.0) /usr/sbin/sshd -D
+(root,79040,3192,0.0) /usr/sbin/modem-manager
+(root,245764,7612,0.0) NetworkManager
+(root,195568,4824,0.0) /usr/lib/policykit-1/polkitd --no-debug
+(rabbitmq,7416,320,0.0) /usr/lib/erlang/erts-5.8.5/bin/epmd -daemon
+(107,25972,1052,0.0) /usr/sbin/dnsmasq -u libvirt-dnsmasq --strict-order --bind-interfaces --pid-file=/var/run/libvirt/network/default.pid --conf-file= --except-interface lo --listen-address 192.168.122.1 --dhcp-range 192.168.122.2,192.168.122.254 --dhcp-leasefile=/var/lib/libvirt/dnsmasq/default.leases --dhcp-lease-max=253 --dhcp-no-override
+(rabbitmq,2563632,283772,0.3) /usr/lib/erlang/erts-5.8.5/bin/beam.smp -W w -K true -A30 -P 1048576 -- -root /usr/lib/erlang -progname erl -- -home /var/lib/rabbitmq -- -noshell -noinput -sname rabbit@OpenStack -boot /var/lib/rabbitmq/mnesia/rabbit@OpenStack-plugins-expand/rabbit -kernel inet_default_connect_options [{nodelay,true}] -sasl errlog_type error -sasl sasl_error_logger false -rabbit error_logger {file,"/var/log/rabbitmq/rabbit@OpenStack.log"} -rabbit sasl_error_logger {file,"/var/log/rabbitmq/rabbit@OpenStack-sasl.log"} -os_mon start_cpu_sup true -os_mon start_disksup false -os_mon start_memsup false -mnesia dir "/var/lib/rabbitmq/mnesia/rabbit@OpenStack"
+(root,7264,1588,0.0) /sbin/dhclient -d -4 -sf /usr/lib/NetworkManager/nm-dhcp-client.action -pf /var/run/sendsigs.omit.d/network-manager.dhclient-eth1.pid -lf /var/lib/dhcp/dhclient-c35837d2-b7d1-4b2e-9ada-222f4a8fc417-eth1.lease -cf /var/run/nm-dhclient-eth1.conf eth1
+(root,121528,3760,0.0) /usr/lib/accountsservice/accounts-daemon
+(root,4191080,4176,0.0) /usr/sbin/console-kit-daemon --no-daemon
+(rabbitmq,4292,352,0.0) /usr/lib/erlang/lib/os_mon-2.2.7/priv/bin/cpu_sup
+(rabbitmq,7380,424,0.0) inet_gethost 4
+(rabbitmq,9480,604,0.0) inet_gethost 4
+(nobody,32088,1508,0.0) /usr/sbin/dnsmasq --no-resolv --keep-in-foreground --no-hosts --bind-interfaces --pid-file=/var/run/sendsigs.omit.d/network-manager.dnsmasq.pid --listen-address=127.0.0.1 --conf-file=/var/run/nm-dns-dnsmasq.conf --cache-size=0 --proxy-dnssec --enable-dbus --conf-dir=/etc/NetworkManager/dnsmasq.d
+(root,219952,4364,0.0) /usr/lib/upower/upowerd
+(root,104008,3136,0.0) /usr/sbin/winbindd
+(root,103908,1792,0.0) /usr/sbin/winbindd
+(colord,491708,11648,0.0) /usr/lib/x86_64-linux-gnu/colord/colord
+(root,91016,5196,0.0) /usr/sbin/apache2 -k start
+(root,131896,3420,0.0) /bin/login --          
+(root,215848,6012,0.0) lightdm --session-child 12 19
+(rtkit,168872,1312,0.0) /usr/lib/rtkit/rtkit-daemon
+(root,103908,1592,0.0) /usr/sbin/winbindd
+(root,0,0,0.0) [kworker/0:0]
+(stack,368840,3740,0.0) /usr/bin/gnome-keyring-daemon --daemonize --login
+(stack,395992,9796,0.0) gnome-session --session=ubuntu
+(stack,0,0,0.0) [lightdm-session] <defunct>
+(stack,12568,316,0.0) /usr/bin/ssh-agent /usr/bin/dbus-launch --exit-with-session gnome-session --session=ubuntu
+(stack,26560,788,0.0) /usr/bin/dbus-launch --exit-with-session gnome-session --session=ubuntu
+(stack,27624,3288,0.0) //bin/dbus-daemon --fork --print-pid 6 --print-address 8 --session
+(stack,680360,18752,0.0) /usr/lib/gnome-settings-daemon/gnome-settings-daemon
+(stack,51448,2452,0.0) /usr/lib/gvfs/gvfsd
+(stack,273444,2828,0.0) /usr/lib/gvfs//gvfs-fuse-daemon -f /home/stack/.gvfs
+(stack,261960,2648,0.0) /usr/lib/dconf/dconf-service
+(stack,56940,3508,0.0) /usr/lib/x86_64-linux-gnu/gconf/gconfd-2
+(stack,526784,15552,0.0) metacity
+(stack,284644,4352,0.0) /usr/bin/pulseaudio --start --log-target=syslog
+(stack,95956,2976,0.0) /usr/lib/pulseaudio/pulse/gconf-helper
+(stack,584652,29392,0.0) unity-2d-panel
+(stack,1078136,81892,0.1) unity-2d-shell
+(stack,500652,16304,0.0) nm-applet
+(stack,308908,8612,0.0) /usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1
+(stack,456384,8856,0.0) /usr/lib/gnome-settings-daemon/gnome-fallback-mount-helper
+(stack,391712,9924,0.0) /usr/lib/bamf/bamfdaemon
+(stack,434248,12268,0.0) bluetooth-applet
+(stack,756036,29352,0.0) nautilus -n
+(stack,72056,4116,0.0) /usr/lib/gvfs/gvfs-gdu-volume-monitor
+(root,119740,3764,0.0) /usr/lib/udisks/udisks-daemon
+(root,45516,800,0.0) udisks-daemon: not polling any devices
+(stack,143420,2772,0.0) /usr/lib/gvfs/gvfs-afc-volume-monitor
+(stack,61652,2484,0.0) /usr/lib/gvfs/gvfs-gphoto2-volume-monitor
+(stack,58316,3340,0.0) /usr/lib/gvfs/gvfsd-trash --spawner :1.7 /org/gtk/gvfs/exec_spaw/0
+(stack,53720,2620,0.0) /usr/lib/gvfs/gvfsd-burn --spawner :1.7 /org/gtk/gvfs/exec_spaw/1
+(stack,457180,18892,0.0) /usr/lib/unity/unity-panel-service
+(stack,443004,6416,0.0) /usr/lib/indicator-messages/indicator-messages-service
+(stack,490616,10188,0.0) /usr/lib/indicator-printers/indicator-printers-service
+(stack,560904,5140,0.0) /usr/lib/indicator-application/indicator-application-service
+(stack,604832,6952,0.0) /usr/lib/indicator-sound/indicator-sound-service
+(stack,530004,6488,0.0) /usr/lib/indicator-session/indicator-session-service
+(stack,558708,7556,0.0) /usr/lib/indicator-datetime/indicator-datetime-service
+(stack,47860,2716,0.0) /usr/lib/geoclue/geoclue-master
+(stack,335068,6616,0.0) /usr/lib/ubuntu-geoip/ubuntu-geoip-provider
+(stack,277128,7408,0.0) /usr/bin/ibus-daemon --xim
+(stack,132236,3580,0.0) /usr/lib/x86_64-linux-gnu/ibus/ibus-gconf
+(stack,498296,29300,0.0) /usr/bin/python /usr/share/ibus/ui/gtk/main.py
+(stack,293572,7328,0.0) /usr/lib/x86_64-linux-gnu/ibus/ibus-x11 --kill-daemon
+(stack,143380,4900,0.0) /usr/lib/ibus-pinyin/ibus-engine-pinyin --ibus
+(stack,358504,4704,0.0) /usr/lib/indicator-appmenu/hud-service
+(stack,319636,9064,0.0) /usr/lib/notify-osd/notify-osd
+(stack,333272,9548,0.0) /usr/lib/gnome-disk-utility/gdu-notification-daemon
+(stack,417368,11792,0.0) /usr/lib/unity-lens-applications/unity-applications-daemon
+(stack,877832,6320,0.0) /usr/lib/unity-lens-files/unity-files-daemon
+(stack,739724,8420,0.0) /usr/lib/unity-lens-music/unity-music-daemon
+(stack,373028,16236,0.0) /usr/bin/python /usr/lib/unity-lens-video/unity-lens-video
+(stack,348220,4896,0.0) /usr/bin/zeitgeist-daemon
+(stack,236908,8496,0.0) /usr/lib/zeitgeist/zeitgeist-fts
+(stack,417448,5428,0.0) zeitgeist-datahub
+(stack,10448,360,0.0) /bin/cat
+(stack,430772,11020,0.0) telepathy-indicator
+(stack,585348,4360,0.0) /usr/lib/unity-lens-music/unity-musicstore-daemon
+(stack,321408,6644,0.0) /usr/lib/telepathy/mission-control-5
+(stack,400172,13764,0.0) /usr/lib/gnome-online-accounts/goa-daemon
+(stack,635308,95296,0.0) /usr/bin/python /usr/lib/unity-scope-video-remote/unity-scope-video-remote
+(stack,317760,12016,0.0) gnome-screensaver
+(stack,524700,17256,0.0) gnome-terminal
+(stack,14788,828,0.0) gnome-pty-helper
+(stack,29864,5612,0.0) bash
+(stack,415516,15684,0.0) update-notifier
+(root,95516,12328,0.0) /usr/bin/python /usr/lib/system-service/system-service-d
+(stack,677212,97160,0.0) /usr/bin/python /usr/bin/update-manager --no-focus-on-map
+(stack,363184,3932,0.0) /usr/lib/deja-dup/deja-dup/deja-dup-monitor
+(root,147288,6392,0.0) sshd: stack [priv]  
+(stack,416844,16404,0.0) deja-dup --prompt
+(stack,147288,2328,0.0) sshd: stack@pts/4   
+(stack,34020,9916,0.0) -bash
+(root,0,0,0.0) [flush-252:0]
+(root,0,0,0.0) [kworker/u:2]
+(stack,38364,7448,0.0) SCREEN -c ./stack-screenrc
+(stack,29888,5532,0.0) bash
+(stack,29888,5648,0.0) bash
+(stack,29888,5648,0.0) bash
+(stack,29888,5648,0.0) bash
+(stack,29888,5648,0.0) bash
+(stack,29888,5652,0.0) bash
+(stack,29888,5648,0.0) bash
+(stack,29888,5648,0.0) bash
+(stack,29888,5648,0.0) bash
+(stack,29888,5648,0.0) bash
+(stack,29888,5648,0.0) bash
+(stack,29888,5648,0.0) bash
+(stack,29888,5648,0.0) bash
+(stack,29888,5648,0.0) bash
+(stack,29888,5648,0.0) bash
+(stack,29888,5648,0.0) bash
+(stack,29888,5648,0.0) bash
+(stack,29888,5652,0.0) bash
+(stack,29888,5648,0.0) bash
+(stack,29888,5652,0.0) bash
+(root,21752,420,0.0) /sbin/udevd --daemon
+(root,21752,408,0.0) /sbin/udevd --daemon
+(root,0,0,0.0) [kworker/u:0]
+(stack,136812,45180,0.0) /usr/bin/python /usr/local/bin/glance-api --config-file=/etc/glance/glance-api.conf
+(stack,116436,35224,0.0) python /usr/local/bin/neutron-lbaas-agent --config-file /etc/neutron/neutron.conf --config-file=/etc/neutron/services/loadbalancer/haproxy/lbaas_agent.ini
+(stack,112540,35496,0.0) /usr/bin/python /usr/local/bin/glance-registry --config-file=/etc/glance/glance-registry.conf
+(stack,241408,58824,0.0) /usr/bin/python /usr/local/bin/nova-scheduler --config-file /etc/nova/nova.conf
+(stack,241120,58308,0.0) /usr/bin/python /usr/local/bin/nova-consoleauth
+(root,21144,1072,0.0) sg libvirtd /usr/local/bin/nova-compute --config-file /etc/nova/nova.conf
+(stack,253636,70648,0.4) /usr/bin/python /usr/local/bin/nova-conductor
+(root,119792,3696,0.0) sudo tail -f /var/log/apache2/horizon_error.log
+(stack,241892,53556,0.0) python /opt/stack/cinder/bin/cinder-api --config-file /etc/cinder/cinder.conf
+(stack,120688,35164,0.0) /usr/bin/python /usr/local/bin/nova-xvpvncproxy --config-file /etc/nova/nova.conf
+(stack,121200,35644,0.0) /usr/bin/python /usr/local/bin/nova-objectstore
+(stack,1753988,55200,0.2) /usr/bin/python /usr/local/bin/nova-compute --config-file /etc/nova/nova.conf
+(root,10464,612,0.0) tail -f /var/log/apache2/horizon_error.log
+(stack,114032,32740,0.0) python /usr/local/bin/neutron-dhcp-agent --config-file /etc/neutron/neutron.conf --config-file=/etc/neutron/dhcp_agent.ini
+(stack,227444,55576,0.3) python /opt/stack/keystone/bin/keystone-all --config-file /etc/keystone/keystone.conf --log-config /etc/keystone/logging.conf -d --debug
+(stack,146964,32268,0.0) /usr/bin/python /usr/local/bin/nova-novncproxy --config-file /etc/nova/nova.conf --web /opt/stack/noVNC
+(stack,164692,68844,0.3) /usr/bin/python /usr/local/bin/nova-api
+(stack,223176,44796,0.0) python /opt/stack/cinder/bin/cinder-scheduler --config-file /etc/cinder/cinder.conf
+(stack,241236,58276,0.0) /usr/bin/python /usr/local/bin/nova-cert
+(stack,206152,38820,0.0) /usr/bin/python /usr/local/bin/glance-registry --config-file=/etc/glance/glance-registry.conf
+(stack,146536,44024,0.0) /usr/bin/python /usr/local/bin/glance-api --config-file=/etc/glance/glance-api.conf
+(root,0,0,0.0) [kworker/4:0]
+(stack,133588,40276,0.0) /usr/bin/python /usr/local/bin/nova-api
+(stack,133588,40288,0.0) /usr/bin/python /usr/local/bin/nova-api
+(stack,133588,40288,0.0) /usr/bin/python /usr/local/bin/nova-api
+(stack,133588,40288,0.0) /usr/bin/python /usr/local/bin/nova-api
+(stack,274356,87548,0.0) /usr/bin/python /usr/local/bin/nova-api
+(stack,277272,90692,0.0) /usr/bin/python /usr/local/bin/nova-api
+(stack,276664,90020,0.0) /usr/bin/python /usr/local/bin/nova-api
+(stack,277328,90592,0.0) /usr/bin/python /usr/local/bin/nova-api
+(stack,164828,65560,0.0) /usr/bin/python /usr/local/bin/nova-api
+(stack,164824,65548,0.0) /usr/bin/python /usr/local/bin/nova-api
+(stack,164824,65548,0.0) /usr/bin/python /usr/local/bin/nova-api
+(stack,164824,65548,0.0) /usr/bin/python /usr/local/bin/nova-api
+(root,0,0,0.0) [kworker/1:2]
+(root,0,0,0.0) [kworker/2:0]
+(nobody,34332,1080,0.0) dnsmasq --no-hosts --no-resolv --strict-order --bind-interfaces --interface=ns-4ca1b40b-87 --except-interface=lo --pid-file=/opt/stack/data/neutron/dhcp/493d111f-3d3f-4f29-aeca-d1e916c51033/pid --dhcp-hostsfile=/opt/stack/data/neutron/dhcp/493d111f-3d3f-4f29-aeca-d1e916c51033/host --dhcp-optsfile=/opt/stack/data/neutron/dhcp/493d111f-3d3f-4f29-aeca-d1e916c51033/opts --leasefile-ro --dhcp-range=set:tag0,192.168.1.0,static,86400s --dhcp-lease-max=256 --conf-file= --domain=openstacklocal
+(root,97120,23712,0.0) /usr/bin/python /usr/local/bin/neutron-ns-metadata-proxy --pid_file=/opt/stack/data/neutron/external/pids/493d111f-3d3f-4f29-aeca-d1e916c51033.pid --metadata_proxy_socket=/opt/stack/data/neutron/metadata_proxy --network_id=493d111f-3d3f-4f29-aeca-d1e916c51033 --state_path=/opt/stack/data/neutron --metadata_port=80 --debug --verbose
+(lp,52144,1696,0.0) /usr/lib/cups/notifier/dbus dbus:// 
+(root,0,0,0.0) [kworker/3:1]
+(root,128276,3652,0.0) smbd -F
+(root,14968,1120,0.0) /usr/sbin/xinetd -dontfork -pidfile /var/run/xinetd.pid -stayalive -inetd_compat -inetd_ipv6
+(root,147288,6388,0.0) sshd: stack [priv]  
+(stack,147288,2332,0.0) sshd: stack@pts/5   
+(stack,33956,9760,0.0) -bash
+(root,0,0,0.0) [kworker/3:0]
+(root,0,0,0.0) [kworker/3:2]
+(root,17876,1576,0.0) /bin/bash /usr/bin/check_mk_agent
+(root,15280,1112,0.0) ps ax -o user,vsz,rss,pcpu,command --columns 10000
+(root,8620,808,0.0) sed -e 1d -e s/ *\([^ ]*\) *\([^ ]*\) *\([^ ]*\) *\([^ ]*\) */(\1,\2,\3,\4) /
+(www-data,91024,2800,0.0) /usr/sbin/apache2 -k start
+(stack,191236,6408,0.0) /usr/sbin/apache2 -k start
+(stack,191236,6408,0.0) /usr/sbin/apache2 -k start
+(stack,191236,6408,0.0) /usr/sbin/apache2 -k start
+(www-data,445524,6824,0.0) /usr/sbin/apache2 -k start
+(www-data,445524,6824,0.0) /usr/sbin/apache2 -k start
+(privoxy,22016,1444,0.0) /usr/sbin/privoxy --pidfile /var/run/privoxy.pid --user privoxy /etc/privoxy/config
+(stack,258508,14068,0.0) vim
+(stack,48752,6092,0.0) python
+<<<mem>>>
+MemTotal:        8177236 kB
+MemFree:          506380 kB
+Buffers:          489936 kB
+Cached:          4132916 kB
+SwapCached:         3788 kB
+Active:          4366704 kB
+Inactive:        2434656 kB
+Active(anon):    1413232 kB
+Inactive(anon):   783684 kB
+Active(file):    2953472 kB
+Inactive(file):  1650972 kB
+Unevictable:        9632 kB
+Mlocked:            9632 kB
+SwapTotal:       4190204 kB
+SwapFree:        4174504 kB
+Dirty:               144 kB
+Writeback:             0 kB
+AnonPages:       2184776 kB
+Mapped:           169852 kB
+Shmem:             11960 kB
+Slab:             699308 kB
+SReclaimable:     650456 kB
+SUnreclaim:        48852 kB
+KernelStack:        5520 kB
+PageTables:        45296 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:     8278820 kB
+Committed_AS:    5873156 kB
+VmallocTotal:   34359738367 kB
+VmallocUsed:      294568 kB
+VmallocChunk:   34359437896 kB
+HardwareCorrupted:     0 kB
+AnonHugePages:         0 kB
+HugePages_Total:       0
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:       2048 kB
+DirectMap4k:       91808 kB
+DirectMap2M:     8296448 kB
+<<<cpu>>>
+0.01 0.04 0.05 1/685 16918 8
+<<<uptime>>>
+1555317.14 12344718.64
+<<<lnx_if:sep(58)>>>
+   br0: 8133789340 60969744    0 77155    0     0          0         0 2043446856 11161813    0    0    0     0       0          0
+ovs-system:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+br-int:       0       0    0    0    0     0          0         0      468       6    0    0    0     0       0          0
+  eth0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+  eth1: 8433762162 61744515    0    0    0     0          0  13934937 2100568033 11218304    0    0    0     0       0          0
+tap4ca1b40b-87:     468       6    0    0    0     0          0         0    49581     463    0    0    0     0       0          0
+tap3fd3e0b6-3e:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+    lo: 13678925510 48789261    0    0    0     0          0         0 13678925510 48789261    0    0    0     0       0          0
+virbr0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+<<<ovs_bonding:sep(58)>>>
+<<<tcp_conn_stats>>>
+01 78
+02 2
+0A 31
+06 3
+<<<md>>>
+Personalities : 
+unused devices: <none>
+<<<diskstat>>>
+1387855495
+   8       0 sda 178888 828 6523086 855244 8555984 4837730 324479388 143453680 0 37488584 144304008
+   8      16 sdb 348 182 2816 80 0 0 0 0 0 80 80
+ 252       0 dm-0 178379 0 6508890 872032 13391554 0 324447576 254932800 0 37508844 255804900
+ 252       1 dm-1 1254 0 10032 4604 3961 0 31688 50092 0 3408 54696
+[dmsetup_info]
+OpenStack-root 252:0 OpenStack root
+OpenStack-swap_1 252:1 OpenStack swap_1
+<<<kernel>>>
+1387855495
+nr_free_pages 126525
+nr_inactive_anon 195921
+nr_active_anon 353308
+nr_inactive_file 412743
+nr_active_file 738368
+nr_unevictable 2408
+nr_mlock 2408
+nr_anon_pages 546109
+nr_mapped 42463
+nr_file_pages 1156660
+nr_dirty 36
+nr_writeback 0
+nr_slab_reclaimable 162614
+nr_slab_unreclaimable 12213
+nr_page_table_pages 11324
+nr_kernel_stack 690
+nr_unstable 0
+nr_bounce 0
+nr_vmscan_write 3961
+nr_vmscan_immediate_reclaim 0
+nr_writeback_temp 0
+nr_isolated_anon 0
+nr_isolated_file 0
+nr_shmem 2990
+nr_dirtied 33111222
+nr_written 32533212
+numa_hit 479382421
+numa_miss 0
+numa_foreign 0
+numa_interleave 7207
+numa_local 479382421
+numa_other 0
+nr_anon_transparent_hugepages 0
+nr_dirty_threshold 179312
+nr_dirty_background_threshold 89656
+pgpgin 3274471
+pgpgout 162239694
+pswpin 965
+pswpout 3961
+pgalloc_dma 4
+pgalloc_dma32 258758836
+pgalloc_normal 221629584
+pgalloc_movable 0
+pgfree 480517049
+pgactivate 3257146
+pgdeactivate 557541
+pgfault 1126530686
+pgmajfault 6045
+pgrefill_dma 0
+pgrefill_dma32 207894
+pgrefill_normal 360842
+pgrefill_movable 0
+pgsteal_kswapd_dma 0
+pgsteal_kswapd_dma32 184326
+pgsteal_kswapd_normal 222283
+pgsteal_kswapd_movable 0
+pgsteal_direct_dma 0
+pgsteal_direct_dma32 0
+pgsteal_direct_normal 0
+pgsteal_direct_movable 0
+pgscan_kswapd_dma 0
+pgscan_kswapd_dma32 186021
+pgscan_kswapd_normal 247099
+pgscan_kswapd_movable 0
+pgscan_direct_dma 0
+pgscan_direct_dma32 0
+pgscan_direct_normal 0
+pgscan_direct_movable 0
+zone_reclaim_failed 0
+pginodesteal 0
+slabs_scanned 411904
+kswapd_inodesteal 0
+kswapd_low_wmark_hit_quickly 4
+kswapd_high_wmark_hit_quickly 129
+kswapd_skip_congestion_wait 0
+pageoutrun 4096
+allocstall 0
+pgrotated 4005
+compact_blocks_moved 0
+compact_pages_moved 0
+compact_pagemigrate_failed 0
+compact_stall 0
+compact_fail 0
+compact_success 0
+htlb_buddy_alloc_success 0
+htlb_buddy_alloc_fail 0
+unevictable_pgs_culled 8039
+unevictable_pgs_scanned 0
+unevictable_pgs_rescued 9557
+unevictable_pgs_mlocked 13543
+unevictable_pgs_munlocked 11135
+unevictable_pgs_cleared 0
+unevictable_pgs_stranded 0
+unevictable_pgs_mlockfreed 0
+thp_fault_alloc 0
+thp_fault_fallback 0
+thp_collapse_alloc 0
+thp_collapse_alloc_failed 0
+thp_split 0
+cpu  5260977 58603 1181105 1233390213 3290368 4 70546 0 0 0
+cpu0 1168773 4205 188262 153868463 309505 0 13029 0 0 0
+cpu1 762964 14411 101957 154301399 269339 0 5588 0 0 0
+cpu2 890546 9127 322728 153394371 260913 4 36557 0 0 0
+cpu3 673710 8844 137475 154356181 267821 0 5236 0 0 0
+cpu4 500106 5711 88477 154282315 612503 0 2816 0 0 0
+cpu5 417466 3960 78141 154439844 500236 0 2558 0 0 0
+cpu6 442033 8129 142708 154336281 566120 0 2401 0 0 0
+cpu7 405375 4213 121353 154411356 503929 0 2356 0 0 0
+intr 753193994 43 3 0 0 0 0 0 0 1 0 0 0 4 0 1518869 0 8735011 15158 0 0 0 1001 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 63843880 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ctxt 1670567788
+btime 1386300177
+processes 654115
+procs_running 1
+procs_blocked 0
+softirq 593355682 0 74012729 311106 171177594 9494688 0 16526415 65922338 83223 255827589
+<<<netctr>>>
+1387855495
+   br0  8133790462 60969761    0 77155    0     0          0         0 2043455201 11161831    0    0    0     0       0          0
+ovs-system        0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+br-int        0       0    0    0    0     0          0         0      468       6    0    0    0     0       0          0
+  eth0        0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+  eth1  8433763352 61744532    0    0    0     0          0  13934937 2100576520 11218323    0    0    0     0       0          0
+tap4ca1b40b-87      468       6    0    0    0     0          0         0    49581     463    0    0    0     0       0          0
+tap3fd3e0b6-3e        0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+    lo  13678925510 48789261    0    0    0     0          0         0 13678925510 48789261    0    0    0     0       0          0
+virbr0        0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+<<<vbox_guest>>>
+<<<cups_queues>>>
+---
+<<<local>>>

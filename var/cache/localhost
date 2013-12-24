@@ -1,0 +1,298 @@
+<<<check_mk>>>
+Version: 1.2.2p3
+AgentOS: linux
+PluginsDirectory: /home/nagios/check_mk/check_mk_agent/plugins
+LocalDirectory: /home/nagios/check_mk/check_mk_agent/local
+AgentDirectory: /home/nagios/check_mk
+OnlyFrom: 
+<<<df>>>
+/dev/mapper/op--controller-root ext4        15211520 1586264  12852548      11% /
+udev                            devtmpfs      500000       4    499996       1% /dev
+/dev/sda1                       ext2          233191   26738    194012      13% /boot
+<<<mounts>>>
+/dev/mapper/op--controller-root / ext4 rw,relatime,errors=remount-ro,data=ordered 0 0
+/dev/sda1 /boot ext2 rw,relatime,errors=continue 0 0
+<<<ps>>>
+(root,24424,2120,0.0) /sbin/init
+(root,0,0,0.0) [kthreadd]
+(root,0,0,0.0) [ksoftirqd/0]
+(root,0,0,0.0) [kworker/0:0]
+(root,0,0,0.0) [migration/0]
+(root,0,0,0.0) [watchdog/0]
+(root,0,0,0.0) [cpuset]
+(root,0,0,0.0) [khelper]
+(root,0,0,0.0) [kdevtmpfs]
+(root,0,0,0.0) [netns]
+(root,0,0,0.0) [sync_supers]
+(root,0,0,0.0) [bdi-default]
+(root,0,0,0.0) [kintegrityd]
+(root,0,0,0.0) [kblockd]
+(root,0,0,0.0) [ata_sff]
+(root,0,0,0.0) [khubd]
+(root,0,0,0.0) [md]
+(root,0,0,0.0) [khungtaskd]
+(root,0,0,0.0) [kswapd0]
+(root,0,0,0.0) [ksmd]
+(root,0,0,0.0) [khugepaged]
+(root,0,0,0.0) [fsnotify_mark]
+(root,0,0,0.0) [ecryptfs-kthrea]
+(root,0,0,0.0) [crypto]
+(root,0,0,0.0) [kthrotld]
+(root,0,0,0.0) [scsi_eh_0]
+(root,0,0,0.0) [scsi_eh_1]
+(root,0,0,0.0) [binder]
+(root,0,0,0.0) [deferwq]
+(root,0,0,0.0) [charger_manager]
+(root,0,0,0.0) [devfreq_wq]
+(root,0,0,0.0) [mpt_poll_0]
+(root,0,0,0.0) [mpt/0]
+(root,0,0,0.0) [scsi_eh_2]
+(root,0,0,0.0) [kdmflush]
+(root,0,0,0.0) [kdmflush]
+(root,0,0,0.0) [jbd2/dm-0-8]
+(root,0,0,0.0) [ext4-dio-unwrit]
+(root,17236,564,0.0) upstart-udev-bridge --daemon
+(root,21604,712,0.0) /sbin/udevd --daemon
+(root,21600,264,0.0) /sbin/udevd --daemon
+(root,21600,232,0.0) /sbin/udevd --daemon
+(root,0,0,0.0) [ttm_swap]
+(root,0,0,0.0) [kpsmoused]
+(root,0,0,0.0) [flush-252:0]
+(root,15192,404,0.0) upstart-socket-bridge --daemon
+(root,7268,720,0.0) dhclient3 -e IF_METRIC=100 -pf /var/run/dhclient.eth0.pid -lf /var/lib/dhcp/dhclient.eth0.leases -1 eth0
+(root,50036,2448,0.0) /usr/sbin/sshd -D
+(syslog,249472,1260,0.0) rsyslogd -c5
+(102,23820,788,0.0) dbus-daemon --system --fork --activation=upstart
+(root,15788,772,0.0) /sbin/getty -8 38400 tty4
+(root,15788,772,0.0) /sbin/getty -8 38400 tty5
+(root,15788,772,0.0) /sbin/getty -8 38400 tty2
+(root,15788,772,0.0) /sbin/getty -8 38400 tty3
+(root,119328,11372,0.0) /usr/sbin/apache2 -k start
+(root,15788,772,0.0) /sbin/getty -8 38400 tty6
+(root,4332,556,0.0) acpid -c /etc/acpi/events -s /var/run/acpid.socket
+(daemon,16912,228,0.0) atd
+(root,19116,956,0.0) cron
+(www-data,155132,40168,0.0) /usr/sbin/apache2 -k start
+(www-data,157236,40216,0.0) /usr/sbin/apache2 -k start
+(www-data,156068,40944,0.0) /usr/sbin/apache2 -k start
+(www-data,155132,40156,0.0) /usr/sbin/apache2 -k start
+(www-data,155140,40136,0.0) /usr/sbin/apache2 -k start
+(nagios,580368,3288,0.0) /usr/sbin/nagios3 -d /etc/nagios3/nagios.cfg
+(www-data,155132,40136,0.0) /usr/sbin/apache2 -k start
+(www-data,156060,40912,0.0) /usr/sbin/apache2 -k start
+(www-data,156060,40912,0.0) /usr/sbin/apache2 -k start
+(www-data,156060,40940,0.0) /usr/sbin/apache2 -k start
+(www-data,156060,40904,0.0) /usr/sbin/apache2 -k start
+(root,54456,1512,0.0) /bin/login --      
+(whoopsie,187664,2604,0.0) whoopsie
+(root,262880,2276,0.0) /usr/sbin/libvirtd -d
+(106,25976,736,0.0) /usr/sbin/dnsmasq -u libvirt-dnsmasq --strict-order --bind-interfaces --pid-file=/var/run/libvirt/network/default.pid --conf-file= --except-interface lo --listen-address 192.168.122.1 --dhcp-range 192.168.122.2,192.168.122.254 --dhcp-leasefile=/var/lib/libvirt/dnsmasq/default.leases --dhcp-lease-max=253 --dhcp-no-override
+(stack,27196,8468,0.0) -bash
+(root,25112,1708,0.0) /usr/lib/postfix/master
+(postfix,27340,1780,0.0) qmgr -l -t fifo -u
+(root,73440,3568,0.0) sshd: nagios [priv] 
+(nagios,73440,1688,0.0) sshd: nagios@pts/1  
+(nagios,27292,8564,0.0) -bash
+(postfix,27176,1524,0.0) pickup -l -t fifo -u -c
+(root,73440,3568,0.0) sshd: nagios [priv] 
+(nagios,73440,1692,0.0) sshd: nagios@pts/0  
+(nagios,27412,8752,0.0) -bash
+(root,14972,1092,0.0) /usr/sbin/xinetd -dontfork -pidfile /var/run/xinetd.pid -stayalive -inetd_compat -inetd_ipv6
+(root,0,0,0.0) [kworker/0:2]
+(root,0,0,0.0) [kworker/0:1]
+(nagios,50872,12424,38.0) python /home/nagios/check_mk/modules/check_mk.py -I
+(root,17880,1560,0.0) /bin/bash /usr/bin/check_mk_agent
+(root,15280,1108,0.0) ps ax -o user,vsz,rss,pcpu,command --columns 10000
+(root,8624,820,0.0) sed -e 1d -e s/ *\([^ ]*\) *\([^ ]*\) *\([^ ]*\) *\([^ ]*\) */(\1,\2,\3,\4) /
+(root,73440,3564,0.0) sshd: nagios [priv] 
+(nagios,73440,1680,0.0) sshd: nagios@pts/2  
+(nagios,27460,8792,0.0) -bash
+(root,0,0,0.0) [kworker/u:0]
+(root,0,0,0.0) [kworker/u:2]
+<<<mem>>>
+MemTotal:        1019084 kB
+MemFree:          193284 kB
+Buffers:           94120 kB
+Cached:           269176 kB
+SwapCached:         1916 kB
+Active:           282548 kB
+Inactive:         458828 kB
+Active(anon):      98308 kB
+Inactive(anon):   279904 kB
+Active(file):     184240 kB
+Inactive(file):   178924 kB
+Unevictable:           0 kB
+Mlocked:               0 kB
+SwapTotal:       1044476 kB
+SwapFree:        1037100 kB
+Dirty:                 0 kB
+Writeback:             0 kB
+AnonPages:        376280 kB
+Mapped:            13512 kB
+Shmem:               132 kB
+Slab:              57720 kB
+SReclaimable:      45420 kB
+SUnreclaim:        12300 kB
+KernelStack:         952 kB
+PageTables:         6864 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:     1554016 kB
+Committed_AS:     608136 kB
+VmallocTotal:   34359738367 kB
+VmallocUsed:      138984 kB
+VmallocChunk:   34359596284 kB
+HardwareCorrupted:     0 kB
+AnonHugePages:         0 kB
+HugePages_Total:       0
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:       2048 kB
+DirectMap4k:       55296 kB
+DirectMap2M:      993280 kB
+<<<cpu>>>
+0.00 0.01 0.05 1/121 11188 1
+<<<uptime>>>
+492033.08 490436.47
+<<<lnx_if:sep(58)>>>
+  eth0: 1167892749 13616129    0    0    0     0          0      6191 31775451  152819    0    0    0     0       0          0
+  eth1:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+    lo: 5783147   44683    0    0    0     0          0         0  5783147   44683    0    0    0     0       0          0
+virbr0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+<<<tcp_conn_stats>>>
+01 5
+0A 7
+06 2
+<<<md>>>
+Personalities : 
+unused devices: <none>
+<<<diskstat>>>
+1387848444
+   8       0 sda 30475 5065 1168724 176612 297738 553365 12110542 2291192 0 655480 2429836
+ 252       0 dm-0 29446 0 1120106 169936 849645 0 12095352 5967248 0 655280 6137184
+ 252       1 dm-1 526 0 4208 2380 1894 0 15152 131696 0 2028 134076
+[dmsetup_info]
+op--controller-root 252:0 op-controller root
+op--controller-swap_1 252:1 op-controller swap_1
+<<<kernel>>>
+1387848444
+nr_free_pages 48317
+nr_inactive_anon 69976
+nr_active_anon 24577
+nr_inactive_file 44731
+nr_active_file 46060
+nr_unevictable 0
+nr_mlock 0
+nr_anon_pages 94070
+nr_mapped 3352
+nr_file_pages 91303
+nr_dirty 0
+nr_writeback 0
+nr_slab_reclaimable 11355
+nr_slab_unreclaimable 3075
+nr_page_table_pages 1716
+nr_kernel_stack 128
+nr_unstable 0
+nr_bounce 0
+nr_vmscan_write 1894
+nr_vmscan_immediate_reclaim 95
+nr_writeback_temp 0
+nr_isolated_anon 0
+nr_isolated_file 0
+nr_shmem 33
+nr_dirtied 934424
+nr_written 928160
+numa_hit 30572650
+numa_miss 0
+numa_foreign 0
+numa_interleave 2758
+numa_local 30572650
+numa_other 0
+nr_anon_transparent_hugepages 0
+nr_dirty_threshold 43155
+nr_dirty_background_threshold 21577
+pgpgin 595754
+pgpgout 6055271
+pswpin 239
+pswpout 1894
+pgalloc_dma 30092
+pgalloc_dma32 30669330
+pgalloc_normal 0
+pgalloc_movable 0
+pgfree 30747864
+pgactivate 569062
+pgdeactivate 391979
+pgfault 47029363
+pgmajfault 2915
+pgrefill_dma 12064
+pgrefill_dma32 386050
+pgrefill_normal 0
+pgrefill_movable 0
+pgsteal_kswapd_dma 0
+pgsteal_kswapd_dma32 179119
+pgsteal_kswapd_normal 0
+pgsteal_kswapd_movable 0
+pgsteal_direct_dma 0
+pgsteal_direct_dma32 0
+pgsteal_direct_normal 0
+pgsteal_direct_movable 0
+pgscan_kswapd_dma 0
+pgscan_kswapd_dma32 182950
+pgscan_kswapd_normal 0
+pgscan_kswapd_movable 0
+pgscan_direct_dma 0
+pgscan_direct_dma32 0
+pgscan_direct_normal 0
+pgscan_direct_movable 0
+zone_reclaim_failed 0
+pginodesteal 0
+slabs_scanned 179456
+kswapd_inodesteal 24311
+kswapd_low_wmark_hit_quickly 2
+kswapd_high_wmark_hit_quickly 104
+kswapd_skip_congestion_wait 0
+pageoutrun 4254
+allocstall 0
+pgrotated 2095
+compact_blocks_moved 0
+compact_pages_moved 0
+compact_pagemigrate_failed 0
+compact_stall 0
+compact_fail 0
+compact_success 0
+htlb_buddy_alloc_success 0
+htlb_buddy_alloc_fail 0
+unevictable_pgs_culled 6208
+unevictable_pgs_scanned 0
+unevictable_pgs_rescued 5520
+unevictable_pgs_mlocked 7098
+unevictable_pgs_munlocked 7098
+unevictable_pgs_cleared 0
+unevictable_pgs_stranded 0
+unevictable_pgs_mlockfreed 0
+thp_fault_alloc 0
+thp_fault_fallback 0
+thp_collapse_alloc 0
+thp_collapse_alloc_failed 0
+thp_split 0
+cpu  68447 20003 30279 48982379 37089 5 2099 0 0 0
+cpu0 68447 20003 30279 48982379 37089 5 2099 0 0 0
+intr 19347988 47 183 0 0 0 0 3 0 1 0 0 0 1793 0 0 480546 0 312684 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 13035545 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ctxt 15107735
+btime 1387356411
+processes 108450
+procs_running 1
+procs_blocked 0
+softirq 19807993 0 2586097 98404 13078962 551723 0 177 0 2956 3489674
+<<<netctr>>>
+1387848444
+  eth0  1167892749 13616129    0    0    0     0          0      6191 31775451  152819    0    0    0     0       0          0
+  eth1        0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+    lo  5788699   44715    0    0    0     0          0         0  5788699   44715    0    0    0     0       0          0
+virbr0        0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+<<<vbox_guest>>>
+<<<postfix_mailq>>>
+Mail queue is empty
+<<<local>>>

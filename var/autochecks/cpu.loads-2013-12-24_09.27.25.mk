@@ -1,0 +1,4 @@
+# /home/nagios/check_mk/var/autochecks/cpu.loads-2013-12-24_09.27.25.mk
+[
+  ("host2", "cpu.loads", None, cpuload_default_levels),
+]

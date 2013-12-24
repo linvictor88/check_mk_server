@@ -1,0 +1,2 @@
+#!/bin/sh
+exec python /home/nagios/check_mk/modules/check_mk.py "$@"

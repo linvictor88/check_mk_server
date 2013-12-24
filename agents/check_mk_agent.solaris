@@ -1,0 +1,203 @@
+#!/usr/bin/bash
+# +------------------------------------------------------------------+
+# |             ____ _               _        __  __ _  __           |
+# |            / ___| |__   ___  ___| | __   |  \/  | |/ /           |
+# |           | |   | '_ \ / _ \/ __| |/ /   | |\/| | ' /            |
+# |           | |___| | | |  __/ (__|   <    | |  | | . \            |
+# |            \____|_| |_|\___|\___|_|\_\___|_|  |_|_|\_\           |
+# |                                                                  |
+# | Copyright Mathias Kettner 2013             mk@mathias-kettner.de |
+# +------------------------------------------------------------------+
+#
+# This file is part of Check_MK.
+# The official homepage is at http://mathias-kettner.de/check_mk.
+#
+# check_mk is free software;  you can redistribute it and/or modify it
+# under the  terms of the  GNU General Public License  as published by
+# the Free Software Foundation in version 2.  check_mk is  distributed
+# in the hope that it will be useful, but WITHOUT ANY WARRANTY;  with-
+# out even the implied warranty of  MERCHANTABILITY  or  FITNESS FOR A
+# PARTICULAR PURPOSE. See the  GNU General Public License for more de-
+# ails.  You should have  received  a copy of the  GNU  General Public
+# License along with GNU Make; see the file  COPYING.  If  not,  write
+# to the Free Software Foundation, Inc., 51 Franklin St,  Fifth Floor,
+# Boston, MA 02110-1301 USA.
+
+# Remove locale settings to eliminate localized outputs where possible
+export LC_ALL=C
+unset LANG
+
+export MK_LIBDIR="/home/nagios/check_mk/check_mk_agent"
+export MK_CONFDIR="/home/nagios/check_mk"
+
+# All executables in PLUGINSDIR will simply be executed and their
+# ouput appended to the output of the agent. Plugins define their own
+# sections and must output headers with '<<<' and '>>>'
+PLUGINSDIR=$MK_LIBDIR/plugins
+
+# All executables in LOCALDIR will by executabled and their
+# output inserted into the section <<<local>>>. Please refer
+# to online documentation for details.
+LOCALDIR=$MK_LIBDIR/local
+
+# close standard input (for security reasons) and stderr
+if [ "$1" = -d ]
+then
+    set -xv
+else
+    exec <&- 2>/dev/null
+fi
+
+echo '<<<check_mk>>>'
+echo Version: 1.2.2p3
+echo AgentOS: solaris
+
+
+# Find out what type of system we run.
+# A standard Zone that will not have hardware of any kind?
+# A Global Zone with hardware?
+if type zonename > /dev/null 2>&1 ; then
+  if [ `zonename` = "global" ]; then
+      platform="global_zone"
+  else
+      platform="zone"
+  fi
+else
+# Otherwise we have a normal or hard-partitioned system
+  platform="hardware"
+fi
+
+echo '<<<df>>>'
+for fs in ufs vxfs
+do
+   df -lk -F $fs 2>/dev/null | sed 1d | \
+   while read Filesystem kbytes used avail capacity Mountedon
+   do
+      kbytes=`expr $used + $avail`
+      echo "${Filesystem} $fs ${kbytes} ${used} ${avail} ${capacity} ${Mountedon}"
+   done
+done
+
+# Filesystem usage for ZFS
+if type zfs > /dev/null 2>&1 ; then
+    echo '<<<zfsget>>>'
+    zfs get -Hp name,quota,used,avail,mountpoint,type
+    echo '[df]'
+    df -lk -F zfs | sed 1d
+fi
+
+# Processes
+echo '<<<ps>>>'
+ps -A -o user,vsz,rss,pcpu,args | sed -e 1d -e 's/ *\([^ ]*\) *\([^ ]*\) *\([^ ]*\) *\([^ ]*\) */(\1,\2,\3,\4) /'
+
+# You need statgrab to be installed. You'll find it 
+# here: http://www.i-scream.org/libstatgrab/ 
+
+statgrab_vars="const. cpu. disk. general. mem. page. proc. swap. user."
+statgrab_sections="proc cpu disk page"
+# Only collect net stats if we aren't in a unpriv. zone.
+if [ "$platform" != "zone" ]; then
+    statgrab_vars="$statgrab_vars net."
+    statgrab_sections="$statgrab_sections net"
+fi
+
+if statgrab $statgrab_vars > /tmp/statgrab.$$ 2>/dev/null
+    then
+    for s in $statgrab_sections
+    do
+        echo "<<<statgrab_$s>>>"
+        cat /tmp/statgrab.$$ | grep "^$s\." | cut -d. -f2-99 | sed 's/ *= */ /'
+    done
+
+    echo '<<<statgrab_mem>>>'
+    cat /tmp/statgrab.$$ | egrep "^(swap|mem)\." | sed 's/ *= */ /'
+
+fi
+[ -f /tmp/statgrab.$$ ] && rm -f /tmp/statgrab.$$
+
+# Output of cpu from Linux agent simulated
+# (Thanks to Cameron Pierce)
+echo '<<<cpu>>>'
+load=`uptime|sed -e 's;.*average: \([0-9]\{1,\}\.[0-9]\{1,\}\), \([0-9]\{1,\}\.[0-9]\{1,\}\), \([0-9]\{1,\}\.[0-9]\{1,\}\).*;\1 \2 \3;'`
+ps=`ps -ef|wc -l|sed -e 's;[ ]\{1,\};;'`
+procs=`psrinfo|wc -l|sed -e 's;[ ]\{1,\};;'`
+echo $load 1/$ps $$ $procs
+
+# check zpool status
+if [ -x /sbin/zpool ]; then
+   echo "<<<zpool_status>>>"
+   /sbin/zpool status -x
+fi
+
+# Uptime compatible with Linux format (thanks to Daniel Roettgermann)
+echo '<<<uptime>>>'
+echo `expr \`nawk 'BEGIN{print srand()}'\` - \`kstat -p unix:0:system_misc:boot_time |awk '{print $2}'\``
+
+
+# NTP 
+# This will only work on Sol10 and above
+if `svcs |grep ntp > /dev/null`; then 
+    echo '<<<ntp>>>'
+    # use ntpq instead, xntpdc gives less info.
+    #xntpdc -p | sed -e 1,2d -e 's/^\(.\)/\1 /' -e 's/^ /%/'
+    ntpq -p | sed -e 1,2d -e 's/^\(.\)/\1 /' -e 's/^ /%/'
+
+    
+fi
+
+# TCP Connection stats
+echo '<<<tcp_conn_stats>>>'
+netstat -nafinet -P tcp | tail  +5 | \
+awk '{ c[$7]++; } END { for (x in c) { print x, c[x];}}'
+
+
+# Multipathing on Solaris10+
+if [ "$platform" != "zone" ]; then
+    echo '<<<solaris_multipath>>>'
+    mpathadm list LU | awk '{if(NR%3==1){dev=$1}
+                             if(NR%3==2){tc=$NF}
+                             if(NR%3==0){printf "%s %s %s\n",dev,tc,$NF}}'
+fi
+
+
+if cd $PLUGINSDIR 2>/dev/null
+then
+    for skript in `ls`
+    do
+        if [ -x "$skript" ] ; then
+            ./$skript
+    fi
+  done
+fi
+
+# Fileinfo-Check: put patterns for files into $MK_CONFDIR/fileinfo.cfg
+echo '<<<fileinfo:sep(124)>>>'
+if [ -f "$MK_CONFDIR/fileinfo.cfg" ] ; 
+then
+    echo ''
+    nawk 'BEGIN{print srand()}'
+    echo `ls $(cat "$MK_CONFDIR/fileinfo.cfg")`"|"`ls -nl $(cat "$MK_CONFDIR/fileinfo.cfg") | awk '{print $5}'`"|"`truss -v lstat -t lstat ls -l $(cat "$MK_CONFDIR/fileinfo.cfg") 2>&1|grep mt |awk '{print $9}'|cut -d . -f 1` 
+fi
+
+echo '<<<local>>>'
+if cd $LOCALDIR 2>/dev/null
+then
+  for skript in `ls`
+  do
+    if [ -x "$skript" ] ; then
+        ./$skript
+    fi
+  done
+fi
+
+# MK's Remote Plugin Executor
+if [ -f "$MK_CONFDIR/mrpe.cfg" ]
+then
+    echo '<<<mrpe>>>'
+    grep -v '^ *#' "$MK_CONFDIR/mrpe.cfg" | grep -v '^ *$' | \
+    while read descr cmdline
+    do
+        OUTPUT=`$cmdline`
+        echo "$descr $? $OUTPUT"
+    done
+fi

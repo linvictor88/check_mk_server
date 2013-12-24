@@ -1,0 +1,318 @@
+<<<check_mk>>>
+Version: 1.2.2p3
+AgentOS: linux
+PluginsDirectory: /usr/lib/check_mk_agent/plugins
+LocalDirectory: /usr/lib/check_mk_agent/local
+AgentDirectory: /etc/check_mk
+OnlyFrom: 
+<<<df>>>
+/dev/mapper/op--controller-root ext4        15211520 3222352  11216460      23% /
+udev                            devtmpfs      499996       4    499992       1% /dev
+/dev/sda1                       ext2          233191   26743    194007      13% /boot
+<<<nfsmounts>>>
+<<<mounts>>>
+/dev/mapper/op--controller-root / ext4 rw,relatime,errors=remount-ro,data=ordered 0 0
+/dev/sda1 /boot ext2 rw,relatime,errors=continue 0 0
+<<<ps>>>
+(root,24452,2344,0.0) /sbin/init
+(root,0,0,0.0) [kthreadd]
+(root,0,0,0.0) [ksoftirqd/0]
+(root,0,0,0.0) [kworker/0:0]
+(root,0,0,0.0) [migration/0]
+(root,0,0,0.0) [watchdog/0]
+(root,0,0,0.0) [cpuset]
+(root,0,0,0.0) [khelper]
+(root,0,0,0.0) [kdevtmpfs]
+(root,0,0,0.0) [netns]
+(root,0,0,0.0) [sync_supers]
+(root,0,0,0.0) [bdi-default]
+(root,0,0,0.0) [kintegrityd]
+(root,0,0,0.0) [kblockd]
+(root,0,0,0.0) [ata_sff]
+(root,0,0,0.0) [khubd]
+(root,0,0,0.0) [md]
+(root,0,0,0.0) [kworker/u:1]
+(root,0,0,0.0) [khungtaskd]
+(root,0,0,0.0) [kswapd0]
+(root,0,0,0.0) [ksmd]
+(root,0,0,0.0) [khugepaged]
+(root,0,0,0.0) [fsnotify_mark]
+(root,0,0,0.0) [ecryptfs-kthrea]
+(root,0,0,0.0) [crypto]
+(root,0,0,0.0) [kthrotld]
+(root,0,0,0.0) [scsi_eh_0]
+(root,0,0,0.0) [scsi_eh_1]
+(root,0,0,0.0) [kworker/u:2]
+(root,0,0,0.0) [binder]
+(root,0,0,0.0) [deferwq]
+(root,0,0,0.0) [charger_manager]
+(root,0,0,0.0) [devfreq_wq]
+(root,0,0,0.0) [mpt_poll_0]
+(root,0,0,0.0) [mpt/0]
+(root,0,0,0.0) [scsi_eh_2]
+(root,0,0,0.0) [kdmflush]
+(root,0,0,0.0) [kdmflush]
+(root,0,0,0.0) [jbd2/dm-0-8]
+(root,0,0,0.0) [ext4-dio-unwrit]
+(root,17236,636,0.0) upstart-udev-bridge --daemon
+(root,21860,1592,0.0) /sbin/udevd --daemon
+(root,21856,1104,0.0) /sbin/udevd --daemon
+(root,0,0,0.0) [ttm_swap]
+(root,0,0,0.0) [kmpathd]
+(root,0,0,0.0) [kmpath_handlerd]
+(root,0,0,0.0) [kpsmoused]
+(root,15192,396,0.0) upstart-socket-bridge --daemon
+(root,7268,1064,0.0) dhclient3 -e IF_METRIC=100 -pf /var/run/dhclient.eth0.pid -lf /var/lib/dhcp/dhclient.eth0.leases -1 eth0
+(root,0,0,0.0) [iscsi_eh]
+(root,0,0,0.0) [ib_addr]
+(root,0,0,0.0) [ib_mcast]
+(root,0,0,0.0) [iw_cm_wq]
+(root,0,0,0.0) [ib_cm]
+(root,0,0,0.0) [rdma_cm]
+(root,4508,500,0.0) /sbin/iscsid
+(root,5000,2948,0.0) /sbin/iscsid
+(root,50036,2932,0.0) /usr/sbin/sshd -D
+(syslog,249472,1528,0.0) rsyslogd -c5
+(102,23924,1008,0.0) dbus-daemon --system --fork --activation=upstart
+(root,15788,972,0.0) /sbin/getty -8 38400 tty4
+(root,15788,976,0.0) /sbin/getty -8 38400 tty5
+(root,15788,976,0.0) /sbin/getty -8 38400 tty2
+(root,15788,968,0.0) /sbin/getty -8 38400 tty3
+(root,15788,972,0.0) /sbin/getty -8 38400 tty6
+(root,4332,708,0.0) acpid -c /etc/acpi/events -s /var/run/acpid.socket
+(root,19116,896,0.0) cron
+(daemon,16912,372,0.0) atd
+(root,13092,596,0.0) tgtd
+(root,13092,404,0.0) tgtd
+(mysql,891976,65708,0.0) /usr/sbin/mysqld
+(whoopsie,187664,4272,0.0) whoopsie
+(root,262884,6044,0.0) /usr/sbin/libvirtd -d
+(root,4404,296,0.0) /bin/sh /usr/lib/ipsec/_plutorun --debug  --uniqueids yes --force_busy no --nocrsend no --strictcrlpolicy no --nat_traversal yes --keep_alive  --protostack auto --force_keepalive no --disable_port_floating no --virtual_private %v4:10.0.0.0/8,%v4:192.168.0.0/16,%v4:172.16.0.0/12,%v4:25.0.0.0/8,%v6:fd00::/8,%v6:fe80::/10 --listen  --crlcheckinterval 0 --ocspuri  --nhelpers  --dump /var/run/pluto/ --opts  --stderrlog  --wait no --pre  --post  --log daemon.error --plutorestartoncrash true --pid /var/run/pluto/pluto.pid
+(root,4308,628,0.0) logger -s -p daemon.error -t ipsec__plutorun
+(root,4404,320,0.0) /bin/sh /usr/lib/ipsec/_plutorun --debug  --uniqueids yes --force_busy no --nocrsend no --strictcrlpolicy no --nat_traversal yes --keep_alive  --protostack auto --force_keepalive no --disable_port_floating no --virtual_private %v4:10.0.0.0/8,%v4:192.168.0.0/16,%v4:172.16.0.0/12,%v4:25.0.0.0/8,%v6:fd00::/8,%v6:fe80::/10 --listen  --crlcheckinterval 0 --ocspuri  --nhelpers  --dump /var/run/pluto/ --opts  --stderrlog  --wait no --pre  --post  --log daemon.error --plutorestartoncrash true --pid /var/run/pluto/pluto.pid
+(root,4404,612,0.0) /bin/sh /usr/lib/ipsec/_plutoload --wait no --post 
+(root,91264,3776,0.0) /usr/lib/ipsec/pluto --nofork --secretsfile /etc/ipsec.secrets --ipsecdir /etc/ipsec.d --use-auto --uniqueids --nat_traversal --virtual_private %v4:10.0.0.0/8,%v4:192.168.0.0/16,%v4:172.16.0.0/12,%v4:25.0.0.0/8,%v6:fd00::/8,%v6:fe80::/10
+(root,91272,1276,0.0) pluto helper  #  0                                                                                                                                                                                                                           
+(root,6328,372,0.0) _pluto_adns
+(106,25976,1036,0.0) /usr/sbin/dnsmasq -u libvirt-dnsmasq --strict-order --bind-interfaces --pid-file=/var/run/libvirt/network/default.pid --conf-file= --except-interface lo --listen-address 192.168.122.1 --dhcp-range 192.168.122.2,192.168.122.254 --dhcp-leasefile=/var/lib/libvirt/dnsmasq/default.leases --dhcp-lease-max=253 --dhcp-no-override
+(root,19456,520,0.0) ovsdb-server: monitoring pid 1590 (healthy)                                                                                                                                                                                                                                                                                                                                                                       
+(root,19596,1832,0.0) ovsdb-server /etc/openvswitch/conf.db -vANY:CONSOLE:EMER -vANY:SYSLOG:ERR -vANY:FILE:INFO --remote=punix:/var/run/openvswitch/db.sock --remote=db:Open_vSwitch,manager_options --private-key=db:SSL,private_key --certificate=db:SSL,certificate --bootstrap-ca-cert=db:SSL,ca_cert --no-chdir --log-file=/var/log/openvswitch/ovsdb-server.log --pidfile=/var/run/openvswitch/ovsdb-server.pid --detach --monitor
+(root,23208,828,0.0) ovs-vswitchd: monitoring pid 1609 (healthy)                                                                                                                                                                                                 
+(root,23212,1812,0.0) ovs-vswitchd unix:/var/run/openvswitch/db.sock -vANY:CONSOLE:EMER -vANY:SYSLOG:ERR -vANY:FILE:INFO --mlockall --no-chdir --log-file=/var/log/openvswitch/ovs-vswitchd.log --pidfile=/var/run/openvswitch/ovs-vswitchd.pid --detach --monitor
+(root,21460,772,0.0) /sbin/udevd --daemon
+(rabbitmq,7420,320,0.0) /usr/lib/erlang/erts-5.8.5/bin/epmd -daemon
+(rabbitmq,579464,26632,0.0) /usr/lib/erlang/erts-5.8.5/bin/beam -W w -K true -A30 -P 1048576 -- -root /usr/lib/erlang -progname erl -- -home /var/lib/rabbitmq -- -noshell -noinput -sname rabbit@op-controller -boot /var/lib/rabbitmq/mnesia/rabbit@op-controller-plugins-expand/rabbit -kernel inet_default_connect_options [{nodelay,true}] -sasl errlog_type error -sasl sasl_error_logger false -rabbit error_logger {file,"/var/log/rabbitmq/rabbit@op-controller.log"} -rabbit sasl_error_logger {file,"/var/log/rabbitmq/rabbit@op-controller-sasl.log"} -os_mon start_cpu_sup true -os_mon start_disksup false -os_mon start_memsup false -mnesia dir "/var/lib/rabbitmq/mnesia/rabbit@op-controller"
+(rabbitmq,4296,348,0.0) /usr/lib/erlang/lib/os_mon-2.2.7/priv/bin/cpu_sup
+(rabbitmq,7384,416,0.0) inet_gethost 4
+(rabbitmq,9484,624,0.0) inet_gethost 4
+(root,91000,3752,0.0) /usr/sbin/apache2 -k start
+(www-data,90732,2648,0.0) /usr/sbin/apache2 -k start
+(stack,191216,6424,0.0) /usr/sbin/apache2 -k start
+(stack,191216,6424,0.0) /usr/sbin/apache2 -k start
+(stack,191216,6424,0.0) /usr/sbin/apache2 -k start
+(www-data,379968,6672,0.0) /usr/sbin/apache2 -k start
+(www-data,379968,6672,0.0) /usr/sbin/apache2 -k start
+(root,54456,1592,0.0) /bin/login --      
+(stack,27560,8896,0.0) -bash
+(root,0,0,0.0) [flush-252:0]
+(root,73440,3568,0.0) sshd: nagios [priv] 
+(nagios,73440,1692,0.0) sshd: nagios@pts/0  
+(nagios,23572,4928,0.0) -bash
+(root,73440,3572,0.0) sshd: nagios [priv] 
+(nagios,73440,1696,0.0) sshd: nagios@pts/3  
+(nagios,23476,4784,0.0) -bash
+(root,0,0,0.0) [kworker/0:1]
+(root,14972,1088,0.0) /usr/sbin/xinetd -dontfork -pidfile /var/run/xinetd.pid -stayalive -inetd_compat -inetd_ipv6
+(root,0,0,0.0) [kworker/0:2]
+(root,17880,1564,0.0) /bin/bash /usr/bin/check_mk_agent
+(root,15280,1112,0.0) ps ax -o user,vsz,rss,pcpu,command --columns 10000
+(root,8624,816,0.0) sed -e 1d -e s/ *\([^ ]*\) *\([^ ]*\) *\([^ ]*\) *\([^ ]*\) */(\1,\2,\3,\4) /
+<<<mem>>>
+MemTotal:        1019084 kB
+MemFree:          518884 kB
+Buffers:           46940 kB
+Cached:           253240 kB
+SwapCached:            0 kB
+Active:           275604 kB
+Inactive:         152804 kB
+Active(anon):     129924 kB
+Inactive(anon):      988 kB
+Active(file):     145680 kB
+Inactive(file):   151816 kB
+Unevictable:        2944 kB
+Mlocked:            2944 kB
+SwapTotal:       1044476 kB
+SwapFree:        1044476 kB
+Dirty:                 0 kB
+Writeback:             0 kB
+AnonPages:        131196 kB
+Mapped:            23356 kB
+Shmem:               612 kB
+Slab:              39712 kB
+SReclaimable:      26224 kB
+SUnreclaim:        13488 kB
+KernelStack:        2096 kB
+PageTables:         5896 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:     1554016 kB
+Committed_AS:    1304364 kB
+VmallocTotal:   34359738367 kB
+VmallocUsed:      138984 kB
+VmallocChunk:   34359596284 kB
+HardwareCorrupted:     0 kB
+AnonHugePages:         0 kB
+HugePages_Total:       0
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:       2048 kB
+DirectMap4k:       55296 kB
+DirectMap2M:      993280 kB
+<<<cpu>>>
+0.00 0.01 0.05 1/261 7748 1
+<<<uptime>>>
+9715.82 9620.24
+<<<lnx_if:sep(58)>>>
+qg-1168dcae-26:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+  eth0: 33061049  331801    0    0    0     0          0       148   856272    6639    0    0    0     0       0          0
+  eth1:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+    lo:   30156     265    0    0    0     0          0         0    30156     265    0    0    0     0       0          0
+ br-ex:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+virbr0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+<<<ovs_bonding:sep(58)>>>
+<<<tcp_conn_stats>>>
+01 5
+0A 11
+<<<md>>>
+Personalities : 
+unused devices: <none>
+<<<diskstat>>>
+1387789251
+   8       0 sda 18063 5170 595130 315772 3651 5650 310386 171284 0 51924 487044
+ 252       0 dm-0 17398 0 548482 319572 9297 0 310360 292256 0 50972 611828
+ 252       1 dm-1 287 0 2296 2228 0 0 0 0 0 1484 2228
+[dmsetup_info]
+op--controller-root 252:0 op-controller root
+op--controller-swap_1 252:1 op-controller swap_1
+<<<kernel>>>
+1387789251
+nr_free_pages 129715
+nr_inactive_anon 247
+nr_active_anon 32481
+nr_inactive_file 37954
+nr_active_file 36420
+nr_unevictable 736
+nr_mlock 736
+nr_anon_pages 32799
+nr_mapped 5826
+nr_file_pages 75045
+nr_dirty 0
+nr_writeback 0
+nr_slab_reclaimable 6556
+nr_slab_unreclaimable 3372
+nr_page_table_pages 1474
+nr_kernel_stack 262
+nr_unstable 0
+nr_bounce 0
+nr_vmscan_write 0
+nr_vmscan_immediate_reclaim 0
+nr_writeback_temp 0
+nr_isolated_anon 0
+nr_isolated_file 0
+nr_shmem 153
+nr_dirtied 38438
+nr_written 33567
+numa_hit 1158793
+numa_miss 0
+numa_foreign 0
+numa_interleave 2756
+numa_local 1158793
+numa_other 0
+nr_anon_transparent_hugepages 0
+nr_dirty_threshold 43786
+nr_dirty_background_threshold 21893
+pgpgin 308957
+pgpgout 155193
+pswpin 0
+pswpout 0
+pgalloc_dma 1
+pgalloc_dma32 1172301
+pgalloc_normal 0
+pgalloc_movable 0
+pgfree 1302142
+pgactivate 54998
+pgdeactivate 0
+pgfault 2303928
+pgmajfault 1323
+pgrefill_dma 0
+pgrefill_dma32 0
+pgrefill_normal 0
+pgrefill_movable 0
+pgsteal_kswapd_dma 0
+pgsteal_kswapd_dma32 0
+pgsteal_kswapd_normal 0
+pgsteal_kswapd_movable 0
+pgsteal_direct_dma 0
+pgsteal_direct_dma32 0
+pgsteal_direct_normal 0
+pgsteal_direct_movable 0
+pgscan_kswapd_dma 0
+pgscan_kswapd_dma32 0
+pgscan_kswapd_normal 0
+pgscan_kswapd_movable 0
+pgscan_direct_dma 0
+pgscan_direct_dma32 0
+pgscan_direct_normal 0
+pgscan_direct_movable 0
+zone_reclaim_failed 0
+pginodesteal 0
+slabs_scanned 0
+kswapd_inodesteal 0
+kswapd_low_wmark_hit_quickly 0
+kswapd_high_wmark_hit_quickly 0
+kswapd_skip_congestion_wait 0
+pageoutrun 1
+allocstall 0
+pgrotated 0
+compact_blocks_moved 0
+compact_pages_moved 0
+compact_pagemigrate_failed 0
+compact_stall 0
+compact_fail 0
+compact_success 0
+htlb_buddy_alloc_success 0
+htlb_buddy_alloc_fail 0
+unevictable_pgs_culled 8043
+unevictable_pgs_scanned 0
+unevictable_pgs_rescued 6776
+unevictable_pgs_mlocked 9561
+unevictable_pgs_munlocked 8354
+unevictable_pgs_cleared 0
+unevictable_pgs_stranded 0
+unevictable_pgs_mlockfreed 0
+thp_fault_alloc 0
+thp_fault_fallback 0
+thp_collapse_alloc 0
+thp_collapse_alloc_failed 0
+thp_split 0
+cpu  2958 148 2292 960074 3993 0 55 0 0 0
+cpu0 2958 148 2292 960074 3993 0 55 0 0 0
+intr 783428 47 1586 0 0 0 0 3 0 1 0 0 0 2801 0 0 9542 0 19660 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 319181 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ctxt 1102531
+btime 1387779535
+processes 7765
+procs_running 1
+procs_blocked 0
+softirq 549205 0 61091 1940 319349 24270 0 1345 0 90 141120
+<<<netctr>>>
+1387789251
+qg-1168dcae-26        0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+  eth0  33062263  331819    0    0    0     0          0       148   861492    6657    0    0    0     0       0          0
+  eth1        0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+    lo    30156     265    0    0    0     0          0         0    30156     265    0    0    0     0       0          0
+ br-ex        0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+virbr0        0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+<<<vbox_guest>>>
+<<<local>>>
