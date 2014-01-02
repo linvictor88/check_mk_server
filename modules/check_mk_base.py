@@ -371,8 +371,9 @@ def get_realhost_info(hostname, ipaddress, check_type, max_cache_age):
     elif len(output) < 16:
         raise MKAgentError("Too short output from agent: '%s'" % output)
 
-    lines = [ l.strip() for l in output.split('\n') ]
-    info = parse_info(lines)
+    #lines = [ l.strip() for l in output.split('\n') ]
+    #info = parse_info(lines)
+    info = output
     store_cached_hostinfo(hostname, info)
     return info.get(check_type, []) # return only data for specified check
 

@@ -27,6 +27,7 @@
 # This file is also read in by check_mk's web pages. In that case,
 # the variable check_mk_web is set to True
 
+import pdb
 import os, sys, socket, time, getopt, glob, re, stat, py_compile, urllib, inspect
 
 # These variable will be substituted at 'make dist' time
@@ -153,6 +154,7 @@ except Exception, e:
 
 
 if __name__ == "__main__":
+    pdb.set_trace()
     try:
         i = sys.argv.index('-c')
         if i > 0 and i < len(sys.argv)-1:

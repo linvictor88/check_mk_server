@@ -30,9 +30,9 @@ mem_extended_perfdata = False
 def check_memory(params, meminfo):
     try:
         swapused = meminfo['SwapTotal'] - meminfo['SwapFree']
-        memused  = meminfo['MemTotal']  - meminfo['MemFree']
+        memused  = meminfo['used']
         # Buffers and Cached are optional (not supported on Windows yet)
-        caches   = meminfo.get('Buffers', 0) + meminfo.get('Cached', 0)
+        caches   = meminfo.get('buffers', 0) + meminfo.get('caches', 0)
     except:
         return (3, "UNKNOWN - invalid output from plugin")
 
@@ -58,7 +58,7 @@ def check_memory(params, meminfo):
 
     totalused_kb = (swapused + memused - caches)
     totalused_mb = totalused_kb / 1024
-    totalmem_kb = meminfo['MemTotal']
+    totalmem_kb = meminfo['total']
     totalmem_mb = totalmem_kb / 1024
     totalused_perc = 100 * (float(totalused_kb) / float(totalmem_kb))
     totalvirt_mb = (meminfo['SwapTotal'] + meminfo['MemTotal']) / 1024
