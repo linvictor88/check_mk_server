@@ -1,0 +1,9 @@
+Python package dependency:
+    eventlet, oslo.config, Paste, PasteDeploy, SQLAlchemy, Babel, iso8601
+
+HOW TO INSTALL Check_MK Agent
+    1. edit PYTHONPATH of bin/check_mk_agent_linux with appropriate path
+    2. sudo cp bin/check_mk_agent_linux /usr/bin/
+    3. sudo chmod a+x /usr/bin/check_mk_agent_linux
+    4. sudo cp ./xinetd.conf /etc/xinetd.conf/check_mk
+    5. sudo /etc/init.d/xinetd restart

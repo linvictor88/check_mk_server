@@ -1,41 +1,15 @@
 #!/usr/bin/python
-# -*- encoding: utf-8; py-indent-offset: 4 -*-
-# +------------------------------------------------------------------+
-# |             ____ _               _        __  __ _  __           |
-# |            / ___| |__   ___  ___| | __   |  \/  | |/ /           |
-# |           | |   | '_ \ / _ \/ __| |/ /   | |\/| | ' /            |
-# |           | |___| | | |  __/ (__|   <    | |  | | . \            |
-# |            \____|_| |_|\___|\___|_|\_\___|_|  |_|_|\_\           |
-# |                                                                  |
-# | Copyright Mathias Kettner 2013             mk@mathias-kettner.de |
-# +------------------------------------------------------------------+
-#
-# This file is part of Check_MK.
-# The official homepage is at http://mathias-kettner.de/check_mk.
-#
-# check_mk is free software;  you can redistribute it and/or modify it
-# under the  terms of the  GNU General Public License  as published by
-# the Free Software Foundation in version 2.  check_mk is  distributed
-# in the hope that it will be useful, but WITHOUT ANY WARRANTY;  with-
-# out even the implied warranty of  MERCHANTABILITY  or  FITNESS FOR A
-# PARTICULAR PURPOSE. See the  GNU General Public License for more de-
-# ails.  You should have  received  a copy of the  GNU  General Public
-# License along with GNU Make; see the file  COPYING.  If  not,  write
-# to the Free Software Foundation, Inc., 51 Franklin St,  Fifth Floor,
-# Boston, MA 02110-1301 USA.
+# encoding: utf-8
 
 import socket, os, sys, time, re, signal, math, tempfile
 import json
 
 
-# Python 2.3 does not have 'set' in normal namespace.
-# But it can be imported from 'sets'
 try:
     set()
 except NameError:
     from sets import Set as set
 
-# colored output, if stdout is a tty
 if sys.stdout.isatty():
     tty_red       = '\033[31m'
     tty_green     = '\033[32m'
@@ -77,7 +51,6 @@ else:
     def tty(fg=-1, bg=-1, attr=-1):
         return ''
 
-# global variables used to cache temporary values
 g_dns_cache                  = {}
 g_infocache                  = {} # In-memory cache of host info.
 g_agent_already_contacted    = {} # do we have agent data from this host?
@@ -94,7 +67,6 @@ g_broken_snmp_hosts          = set([])
 g_broken_agent_hosts         = set([])
 
 
-# variables set later by getopt
 opt_dont_submit              = False
 opt_showplain                = False
 opt_showperfdata             = False
@@ -106,7 +78,6 @@ opt_use_snmp_walk            = False
 opt_cleanup_autochecks       = False
 fake_dns                     = False
 
-# register SIGINT handler for consistenct CTRL+C handling
 def interrupt_handler(signum, frame):
     sys.stderr.write('<Interrupted>\n')
     sys.exit(1)
@@ -137,24 +108,10 @@ class MKSNMPError(Exception):
     def __str__(self):
         return self.reason
 
-#   +----------------------------------------------------------------------+
-#   |         _                                    _   _                   |
-#   |        / \   __ _  __ _ _ __ ___  __ _  __ _| |_(_) ___  _ __        |
-#   |       / _ \ / _` |/ _` | '__/ _ \/ _` |/ _` | __| |/ _ \| '_ \       |
-#   |      / ___ \ (_| | (_| | | |  __/ (_| | (_| | |_| | (_) | | | |      |
-#   |     /_/   \_\__, |\__, |_|  \___|\__, |\__,_|\__|_|\___/|_| |_|      |
-#   |             |___/ |___/          |___/                               |
-#   +----------------------------------------------------------------------+
 
-# Compute the name of a summary host
 def summary_hostname(hostname):
     return aggr_summary_hostname % hostname
 
-# Updates the state of an aggregated service check from the output of
-# one of the underlying service checks. The status of the aggregated
-# service will be updated such that the new status is the maximum
-# (crit > unknown > warn > ok) of all underlying status. Appends the output to
-# the output list and increases the count by 1.
 def store_aggregated_service_result(hostname, detaildesc, aggrdesc, newstatus, newoutput):
     global g_aggregated_service_results
     count, status, outputlist = g_aggregated_service_results.get(aggrdesc, (0, 0, []))
@@ -172,8 +129,6 @@ def status_worse(newstatus, status):
     else:
         return newstatus > status # 0 < 1 < 3 are in correct order
 
-# Submit the result of all aggregated services of a host
-# to Nagios. Those are stored in g_aggregated_service_results
 def submit_aggregated_results(hostname):
     if not host_is_aggregated(hostname):
         return
@@ -228,39 +183,13 @@ def submit_check_mk_aggregation(hostname, status, output):
 
 
 
-#   +----------------------------------------------------------------------+
-#   |                 ____      _         _       _                        |
-#   |                / ___| ___| |_    __| | __ _| |_ __ _                 |
-#   |               | |  _ / _ \ __|  / _` |/ _` | __/ _` |                |
-#   |               | |_| |  __/ |_  | (_| | (_| | || (_| |                |
-#   |                \____|\___|\__|  \__,_|\__,_|\__\__,_|                |
-#   |                                                                      |
-#   +----------------------------------------------------------------------+
 
 
-# This is the main function for getting information needed by a
-# certain check. It is called once for each check type. For SNMP this
-# is needed since not all data for all checks is fetched at once. For
-# TCP based checks the first call to this function stores the
-# retrieved data in a global variable. Later calls to this function
-# get their data from there.
 
-# If the host is a cluster, the information is fetched from all its
-# nodes an then merged per-check-wise.
 
-# For cluster checks we do not have an ip address from Nagios
-# We need to do DNS-lookups in that case :-(. We could avoid that at
-# least in case of precompiled checks. On the other hand, cluster checks
-# usually use existing cache files, if check_mk is not misconfigured,
-# and thus do no network activity at all...
 
 def get_host_info(hostname, ipaddress, checkname):
 
-    # If the check want's the node info, we add an additional
-    # column (as the first column) with the name of the node
-    # or None (in case of non-clustered nodes). On problem arises,
-    # if we deal with subchecks. We assume that all subchecks
-    # have the same setting here. If not, let's raise an exception.
     add_nodeinfo = check_info.get(checkname, {}).get("node_info", False)
 
     nodes = nodes_of(hostname)
@@ -272,8 +201,6 @@ def get_host_info(hostname, ipaddress, checkname):
         opt_use_cachefile = True
 	is_snmp_error = False
         for node in nodes:
-            # If an error with the agent occurs, we still can (and must)
-            # try the other node.
             try:
                 ipaddress = lookup_ipaddress(node)
                 new_info = get_realhost_info(node, ipaddress, checkname, cluster_max_cachefile_age)
@@ -303,18 +230,6 @@ def get_host_info(hostname, ipaddress, checkname):
         else:
             return info
 
-# Gets info from a real host (not a cluster). There are three possible
-# ways: TCP, SNMP and external command.  This function raises
-# MKAgentError or MKSNMPError, if there could not retrieved any data. It returns [],
-# if the agent could be contacted but the data is empty (no items of
-# this check type).
-#
-# What makes the thing a bit tricky is the fact, that data
-# might have to be fetched via SNMP *and* TCP for one host
-# (even if this is unlikeyly)
-#
-# This function assumes, that each check type is queried
-# only once for each host.
 def get_realhost_info(hostname, ipaddress, check_type, max_cache_age):
     info = get_cached_hostinfo(hostname)
     if info and info.has_key(check_type):
@@ -322,28 +237,18 @@ def get_realhost_info(hostname, ipaddress, check_type, max_cache_age):
 
     cache_relpath = hostname + "." + check_type
 
-    # Is this an SNMP table check? Then snmp_info specifies the OID to fetch
-    # Please note, that if the check_type is foo.bar then we lookup the
-    # snmp info for "foo", not for "foo.bar".
     oid_info = snmp_info.get(check_type.split(".")[0])
     if oid_info:
         content = read_cache_file(cache_relpath, max_cache_age)
         if content:
             return eval(content)
-        # Not cached -> need to get info via SNMP
 
-        # Try to contact host only once
 	if hostname in g_broken_snmp_hosts:
 	    raise MKSNMPError("")
 
-        # New in 1.1.3: oid_info can now be a list: Each element
-        # of that list is interpreted as one real oid_info, fetches
-        # a separate snmp table. The overall result is then the list
-        # of these results.
         try:
             if type(oid_info) == list:
                 table = [ get_snmp_table(hostname, ipaddress, entry) for entry in oid_info ]
-                # if at least one query fails, we discard the hole table
                 if None in table:
                     table = None
             else:
@@ -358,9 +263,6 @@ def get_realhost_info(hostname, ipaddress, check_type, max_cache_age):
         write_cache_file(cache_relpath, repr(table) + "\n")
         return table
 
-    # No SNMP check. Then we must contact the check_mk_agent. Have we already
-    # to get data from the agent? If yes we must not do that again! Even if
-    # no cache file is present
     if g_agent_already_contacted.has_key(hostname):
 	raise MKAgentError("")
 
@@ -373,15 +275,12 @@ def get_realhost_info(hostname, ipaddress, check_type, max_cache_age):
     elif len(output) < 16:
         raise MKAgentError("Too short output from agent: '%s'" % output)
 
-    #lines = [ l.strip() for l in output.split('\n') ]
-    #info = parse_info(lines)
     info = json.loads(output)
     store_cached_hostinfo(hostname, info)
     return info.get(check_type, []) # return only data for specified check
 
 
 def read_cache_file(relpath, max_cache_age):
-    # Cache file present, caching allowed? -> read from cache
     cachefile = tcp_cache_dir + "/" + relpath
     if os.path.exists(cachefile) and (
         (opt_use_cachefile and ( not opt_no_cache ) )
@@ -402,7 +301,6 @@ def read_cache_file(relpath, max_cache_age):
 
     if opt_no_tcp:
         raise MKGeneralException("Host is unreachable")
-        #Cache file '%s' missing or too old. TCP disallowed by you." % cachefile)
 
 
 def write_cache_file(relpath, output):
@@ -413,8 +311,6 @@ def write_cache_file(relpath, output):
         except Exception, e:
             raise MKGeneralException("Cannot create directory %s: %s" % (tcp_cache_dir, e))
     try:
-        # write retrieved information to cache file - if we are not root.
-        # We assume that Nagios never runs as root.
         if not i_am_root():
             f = open(cachefile, "w+")
             f.write(output)
@@ -423,27 +319,18 @@ def write_cache_file(relpath, output):
         raise MKGeneralException("Cannot write cache file %s: %s" % (cachefile, e))
 
 
-# Get information about a real host (not a cluster node) via TCP
-# or by executing an external programm. ipaddress may be None.
-# In that case it will be looked up if needed. Also caching will
-# be handled here
 def get_agent_info(hostname, ipaddress, max_cache_age):
     output = read_cache_file(hostname, max_cache_age)
     if not output:
-        # Try to contact every host only once
         if hostname in g_broken_agent_hosts:
             raise MKAgentError("")
 
-        # If the host ist listed in datasource_programs the data from
-        # that host is retrieved by calling an external program (such
-        # as ssh or rsy) instead of a TCP connect.
         commandline = get_datasource_program(hostname, ipaddress)
         if commandline:
             output = get_agent_info_program(commandline)
         else:
             output = get_agent_info_tcp(hostname, ipaddress)
 
-        # Got new data? Write to cache file
         write_cache_file(hostname, output)
 
     if agent_simulator:
@@ -451,7 +338,6 @@ def get_agent_info(hostname, ipaddress, max_cache_age):
 
     return output
 
-# Get data in case of external programm
 def get_agent_info_program(commandline):
     if opt_verbose:
         sys.stderr.write("Calling external programm %s\n" % commandline)
@@ -469,7 +355,6 @@ def get_agent_info_program(commandline):
             raise MKAgentError("Programm '%s' exited with code %d" % (commandline, exitstatus >> 8))
     return output
 
-# Get data in case of TCP
 def get_agent_info_tcp(hostname, ipaddress):
     if not ipaddress:
         raise MKGeneralException("Cannot contact agent: host '%s' has no IP address." % hostname)
@@ -503,13 +388,10 @@ def get_agent_info_tcp(hostname, ipaddress):
                            (ipaddress, agent_port_of(hostname), e))
 
 
-# Gets all information about one host so far cached.
-# Returns None if nothing has been stored so far
 def get_cached_hostinfo(hostname):
     global g_infocache
     return g_infocache.get(hostname, None)
 
-# store complete information about a host
 def store_cached_hostinfo(hostname, info):
     global g_infocache
     oldinfo = get_cached_hostinfo(hostname)
@@ -519,7 +401,6 @@ def store_cached_hostinfo(hostname, info):
     else:
         g_infocache[hostname] = info
 
-# store information about one check type
 def store_cached_checkinfo(hostname, checkname, table):
     global g_infocache
     info = get_cached_hostinfo(hostname)
@@ -528,7 +409,6 @@ def store_cached_checkinfo(hostname, checkname, table):
     else:
         g_infocache[hostname] = { checkname: table }
 
-# Split agent output in chunks, splits lines by whitespaces
 def parse_info(lines):
     info = {}
     chunk = []
@@ -537,7 +417,6 @@ def parse_info(lines):
     for line in lines:
         if line[:3] == '<<<' and line[-3:] == '>>>':
             chunkheader = line[3:-3]
-            # chunk header has format <<<name:opt1(args):opt2:opt3(args)>>>
             headerparts = chunkheader.split(":")
             chunkname = headerparts[0]
             chunkoptions = {}
@@ -571,25 +450,14 @@ def cachefile_age(filename):
                                  % (filename, e))
         return -1
 
-#   +----------------------------------------------------------------------+
-#   |                ____                  _                               |
-#   |               / ___|___  _   _ _ __ | |_ ___ _ __ ___                |
-#   |              | |   / _ \| | | | '_ \| __/ _ \ '__/ __|               |
-#   |              | |__| (_) | |_| | | | | ||  __/ |  \__ \               |
-#   |               \____\___/ \__,_|_| |_|\__\___|_|  |___/               |
-#   |                                                                      |
-#   +----------------------------------------------------------------------+
 
 
-# Variable                 time_t    value
-# netctr.eth.tx_collisions 112354335 818
 def load_counters(hostname):
     global g_counters
     filename = counters_directory + "/" + hostname
     try:
         g_counters = eval(file(filename).read())
     except:
-        # Try old syntax
         try:
             lines = file(filename).readlines()
             for line in lines:
@@ -601,11 +469,8 @@ def load_counters(hostname):
 def get_counter(countername, this_time, this_val, allow_negative=False):
     global g_counters
 
-    # First time we see this counter? Do not return
-    # any data!
     if not countername in g_counters:
         g_counters[countername] = (this_time, this_val)
-        # Do not suppress this check on check_mk -nv
         if opt_dont_submit:
             return 1.0, 0.0
         raise MKCounterWrapped(countername, 'Counter initialization')
@@ -613,23 +478,15 @@ def get_counter(countername, this_time, this_val, allow_negative=False):
     last_time, last_val = g_counters.get(countername)
     timedif = this_time - last_time
     if timedif <= 0: # do not update counter
-        # Reset counter to a (hopefully) reasonable value
         g_counters[countername] = (this_time, this_val)
-        # Do not suppress this check on check_mk -nv
         if opt_dont_submit:
             return 1.0, 0.0
         raise MKCounterWrapped(countername, 'No time difference')
 
-    # update counter for next time
     g_counters[countername] = (this_time, this_val)
 
     valuedif = this_val - last_val
     if valuedif < 0 and not allow_negative:
-        # Do not try to handle wrapper counters. We do not know
-        # wether they are 32 or 64 bit. It also could happen counter
-        # reset (reboot, etc.). Better is to leave this value undefined
-        # and wait for the next check interval.
-        # Do not suppress this check on check_mk -nv
         if opt_dont_submit:
             return 1.0, 0.0
         raise MKCounterWrapped(countername, 'Value overflow')
@@ -638,46 +495,28 @@ def get_counter(countername, this_time, this_val, allow_negative=False):
     return timedif, per_sec
 
 
-# Compute average by gliding exponential algorithm
-# itemname: unique id for storing this average until the next check
-# this_time: timestamp of new value
-# backlog: averaging horizon in minutes
-# initialize_zero: assume average of 0.0 when now previous average is stored
 def get_average(itemname, this_time, this_val, backlog, initialize_zero = True):
 
-    # first call: take current value as average or assume 0.0
     if not itemname in g_counters:
         if initialize_zero:
             this_val = 0
         g_counters[itemname] = (this_time, this_val)
         return 1.0, this_val # avoid time diff of 0.0 -> avoid division by zero
 
-    # Get previous value and time difference
     last_time, last_val = g_counters.get(itemname)
     timedif = this_time - last_time
 
-    # Gracefully handle time-anomaly of target systems. We loose
-    # one value, but what then heck..
     if timedif < 0:
         timedif = 0
 
-    # Compute the weight: We do it like this: First we assume that
-    # we get one sample per minute. And that backlog is the number
-    # of minutes we should average over. Then we want that the weight
-    # of the values of the last average minutes have a fraction of W%
-    # in the result and the rest until infinity the rest (1-W%).
-    # Then the weight can be computed as backlog'th root of 1-W
     percentile = 0.50
 
     weight_per_minute = (1 - percentile) ** (1.0 / backlog)
 
-    # now let's compute the weight per second. This is done
     weight = weight_per_minute ** (timedif / 60.0)
 
     new_val = last_val * weight + this_val * (1 - weight)
 
-    # print "Alt: %.5f, Jetzt: %.5f, Timedif: %.1f, Gewicht: %.5f, Neu: %.5f" % \
-    #     (last_val, this_val, timedif, weight, new_val)
 
     g_counters[itemname] = (this_time, new_val)
     return timedif, new_val
@@ -694,22 +533,9 @@ def save_counters(hostname):
         except Exception, e:
             raise MKGeneralException("User %s cannot write to %s: %s" % (username(), filename, e))
 
-# writelines([ "%s %d %d\n" % (i[0], i[1][0], i[1][1]) for i in g_counters.items() ])
 
 
-#   +----------------------------------------------------------------------+
-#   |               ____ _               _    _                            |
-#   |              / ___| |__   ___  ___| | _(_)_ __   __ _                |
-#   |             | |   | '_ \ / _ \/ __| |/ / | '_ \ / _` |               |
-#   |             | |___| | | |  __/ (__|   <| | | | | (_| |               |
-#   |              \____|_| |_|\___|\___|_|\_\_|_| |_|\__, |               |
-#   |                                                 |___/                |
-#   |                                                                      |
-#   | All about performing the actual checks and send the data to Nagios.  |
-#   +----------------------------------------------------------------------+
 
-# This is the main check function - the central entry point to all and
-# everything
 def do_check(hostname, ipaddress, only_check_types = None):
 
     if opt_verbose:
@@ -776,7 +602,6 @@ def convert_check_info():
         basename = check_type.split(".")[0]
 
         if type(info) != dict:
-            # Convert check declaration from old style to new API
             check_function, service_description, has_perfdata, inventory_function = info
             if inventory_function == no_inventory_possible:
                 inventory_function = None
@@ -786,11 +611,8 @@ def convert_check_info():
                 "service_description"     : service_description,
                 "has_perfdata"            : not not has_perfdata,
                 "inventory_function"      : inventory_function,
-                # Insert check name as group if no group is being defined
                 "group"                   : checkgroup_of.get(check_type, check_type),
                 "snmp_info"               : snmp_info.get(check_type),
-                # Sometimes the scan function is assigned to the check_type
-                # rather than to the base name.
                 "snmp_scan_function"      :
                     snmp_scan_functions.get(check_type,
                         snmp_scan_functions.get(basename)),
@@ -798,8 +620,6 @@ def convert_check_info():
                 "node_info"               : False,
             }
         else:
-            # Check does already use new API. Make sure that all keys are present,
-            # extra check-specific information into file-specific variables.
             info.setdefault("inventory_function", None)
             info.setdefault("group", None)
             info.setdefault("snmp_info", None)
@@ -807,12 +627,9 @@ def convert_check_info():
             info.setdefault("default_levels_variable", None)
             info.setdefault("node_info", False)
 
-            # Include files are related to the check file (= the basename),
-            # not to the (sub-)check. So we keep them in check_includes.
             check_includes.setdefault(basename, [])
             check_includes[basename] += info.get("includes", [])
 
-    # Make sure that setting for node_info of check and subcheck matches
     for check_type, info in check_info.iteritems():
         if "." in check_type:
             base_check = check_type.split(".")[0]
@@ -824,9 +641,6 @@ def convert_check_info():
                raise MKGeneralException("Invalid check implementation: node_info for %s and %s are different." % (
                    (base_check, check_type)))
 
-    # Now gather snmp_info and snmp_scan_function back to the
-    # original arrays. Note: these information is tied to a "agent section",
-    # not to a check. Several checks may use the same SNMP info and scan function.
     for check_type, info in check_info.iteritems():
         basename = check_type.split(".")[0]
         if info["snmp_info"] and basename not in snmp_info:
@@ -834,8 +648,6 @@ def convert_check_info():
         if info["snmp_scan_function"] and basename not in snmp_scan_functions:
             snmp_scan_functions[basename] = info["snmp_scan_function"]
 
-# Loops over all checks for a host, gets the data, calls the check
-# function that examines that data and sends the result to Nagios
 def do_all_checks_on_host(hostname, ipaddress, only_check_types = None):
     global g_aggregated_service_results
     g_aggregated_service_results = {}
@@ -850,7 +662,6 @@ def do_all_checks_on_host(hostname, ipaddress, only_check_types = None):
         if only_check_types != None and checkname not in only_check_types:
             continue
 
-        # Skip checks that are not in their check period
         period = check_period_of(hostname, description)
         if period and not check_timeperiod(period):
             if opt_debug:
@@ -861,8 +672,6 @@ def do_all_checks_on_host(hostname, ipaddress, only_check_types = None):
             sys.stderr.write("Service %s: timeperiod %s is currently active.\n" %
                     (description, period))
 
-        # In case of a precompiled check table info is the aggrated
-        # service name. In the non-precompiled version there are the dependencies
         if type(info) == str:
             aggrname = info
         else:
@@ -895,9 +704,6 @@ def do_all_checks_on_host(hostname, ipaddress, only_check_types = None):
             try:
                 dont_submit = False
                 result = check_function(item, params, info)
-            # handle check implementations that do not yet support the
-            # handling of wrapped counters via exception. Do not submit
-            # any check result in that case:
             except MKCounterWrapped, e:
                 if opt_verbose:
                     print "Counter wrapped, not handled by check, ignoring this check result: %s" % e
@@ -1005,7 +811,6 @@ def convert_perf_value(x):
         return str(x)
 
 def convert_perf_data(p):
-    # replace None with "" and fill up to 7 values
     p = (map(convert_perf_value, p) + ['','','',''])[0:6]
     return "%s=%s;%s;%s;%s;%s" %  tuple(p)
 
@@ -1025,21 +830,14 @@ def submit_check_result(host, servicedesc, result, sa):
         infotext = nagios_state_names[state] + " - " + infotext
 
     global nagios_command_pipe
-    # [<timestamp>] PROCESS_SERVICE_CHECK_RESULT;<host_name>;<svc_description>;<return_code>;<plugin_output>
 
-    # Aggregated service -> store for later
     if sa != "":
         store_aggregated_service_result(host, servicedesc, sa, state, infotext)
 
-    # performance data - if any - is stored in the third part of the result
     perftexts = [];
     perftext = ""
 
     if perfdata:
-        # Check may append the name of the check command to the
-        # list of perfdata. It is of type string. And it might be
-        # needed by the graphing tool in order to choose the correct
-        # template. Currently this is used only by mrpe.
         if len(perfdata) > 0 and type(perfdata[-1]) == str:
             check_command = perfdata[-1]
             del perfdata[-1]
@@ -1072,8 +870,6 @@ def submit_to_nagios(host, service, state, output):
         if nagios_command_pipe:
             nagios_command_pipe.write("[%d] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n" %
                                    (int(time.time()), host, service, state, output)  )
-            # Important: Nagios needs the complete command in one single write() block!
-            # Python buffers and sends chunks of 4096 bytes, if we do not flush.
             nagios_command_pipe.flush()
     elif check_submission == "file":
         open_checkresult_file()
@@ -1096,19 +892,7 @@ output=%s
         raise MKGeneralException("Invalid setting %r for check_submission. Must be 'pipe' or 'file'" % check_submission)
 
 
-#   +----------------------------------------------------------------------+
-#   |                  _   _      _                                        |
-#   |                 | | | | ___| |_ __   ___ _ __ ___                    |
-#   |                 | |_| |/ _ \ | '_ \ / _ \ '__/ __|                   |
-#   |                 |  _  |  __/ | |_) |  __/ |  \__ \                   |
-#   |                 |_| |_|\___|_| .__/ \___|_|  |___/                   |
-#   |                              |_|                                     |
-#   +----------------------------------------------------------------------+
 
-# determine the name of the current user. This involves
-# a lookup of /etc/passwd. Because this function is needed
-# only in general error cases, the pwd module is imported
-# here - not globally
 def username():
     import pwd
     return pwd.getpwuid(os.getuid())[0]
@@ -1116,8 +900,6 @@ def username():
 def i_am_root():
     return os.getuid() == 0
 
-# Returns the nodes of a cluster, or None if hostname is
-# not a cluster
 def nodes_of(hostname):
     for tagged_hostname, nodes in clusters.items():
         if hostname == tagged_hostname.split("|")[0]:
@@ -1125,27 +907,12 @@ def nodes_of(hostname):
     return None
 
 
-#   +----------------------------------------------------------------------+
-#   |     ____ _               _      _          _                         |
-#   |    / ___| |__   ___  ___| | __ | |__   ___| |_ __   ___ _ __ ___     |
-#   |   | |   | '_ \ / _ \/ __| |/ / | '_ \ / _ \ | '_ \ / _ \ '__/ __|    |
-#   |   | |___| | | |  __/ (__|   <  | | | |  __/ | |_) |  __/ |  \__ \    |
-#   |    \____|_| |_|\___|\___|_|\_\ |_| |_|\___|_| .__/ \___|_|  |___/    |
-#   |                                             |_|                      |
-#   |                                                                      |
-#   | These functions are used in some of the checks.                      |
-#   +----------------------------------------------------------------------+
 
 
-# check range, values might be negative!
-# returns True, if value is inside the interval
 def within_range(value, minv, maxv):
     if value >= 0: return value >= minv and value <= maxv
     else: return value <= minv and value >= maxv
 
-# compile regex or look it up in already compiled regexes
-# (compiling is a CPU consuming process. We cache compiled
-# regexes).
 def get_regex(pattern):
     reg = compiled_regexes.get(pattern)
     if not reg:
@@ -1153,11 +920,8 @@ def get_regex(pattern):
         compiled_regexes[pattern] = reg
     return reg
 
-# Names of texts usually output by checks
 nagios_state_names = ["OK", "WARN", "CRIT", "UNKNOWN"]
 
-# int() function that return 0 for strings the
-# cannot be converted to a number
 def saveint(i):
     try:
         return int(i)
@@ -1170,13 +934,8 @@ def savefloat(f):
     except:
         return 0.0
 
-# Takes bytes as integer and returns a string which represents the bytes in a
-# more human readable form scaled to GB/MB/KB
-# The unit parameter simply changes the returned string, but does not interfere
-# with any calcluations
 def get_bytes_human_readable(b, base=1024.0, bytefrac=True, unit="B"):
     base = float(base)
-    # Handle negative bytes correctly
     prefix = ''
     if b < 0:
         prefix = '-'
@@ -1195,8 +954,6 @@ def get_bytes_human_readable(b, base=1024.0, bytefrac=True, unit="B"):
     else: # Omit byte fractions
         return '%s%.0f%s' % (prefix, b, unit)
 
-# Similar to get_bytes_human_readable, but optimized for file
-# sizes
 def get_filesize_human_readable(size):
     if size < 4 * 1024 * 1024:
         return str(size)
@@ -1227,12 +984,9 @@ def get_nic_speed_human_readable(speed):
         pass
     return speed
 
-# Convert Fahrenheit to Celsius
 def to_celsius(f):
     return round(float(f) - 32.0) * 5.0 / 9.0
 
-# Format time difference seconds into approximated
-# human readable value
 def get_age_human_readable(secs):
     if secs < 240:
         return "%d sec" % secs
@@ -1249,26 +1003,364 @@ def get_age_human_readable(secs):
         return "%d days, %d hours" % (days, hours)
     return "%d days" % days
 
-# Quote string for use as arguments on the shell
 def quote_shell_string(s):
     return "'" + s.replace("'", "'\"'\"'") + "'"
 
 
-# Check if a timeperiod is currently active. We have no other way than
-# doing a Livestatus query. This is not really nice, but if you have a better
-# idea, please tell me...
 g_inactive_timerperiods = None
 def check_timeperiod(timeperiod):
     global g_inactive_timerperiods
-    # Let exceptions happen, they will be handled upstream.
     if g_inactive_timerperiods == None:
         import socket
         s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         s.connect(livestatus_unix_socket)
-        # We just get the currently inactive timeperiods. All others
-        # (also non-existing) are considered to be active
         s.send("GET timeperiods\nColumns:name\nFilter: in = 0\n")
         s.shutdown(socket.SHUT_WR)
         g_inactive_timerperiods = s.recv(10000000).splitlines()
     return timeperiod not in g_inactive_timerperiods
 
+
+# Import check_mk modules
+CHECK_MK_LIB_MODULE = os.path.join(os.path.dirname(__file__),
+                             '../..')
+sys.path.append(CHECK_MK_LIB_MODULE)
+from check_mk.devices import devices
+
+# very simple commandline parsing: only -v and -d are supported
+opt_verbose = '-v' in sys.argv
+opt_debug   = '-d' in sys.argv
+
+# make sure these names are defined (even if never needed)
+no_inventory_possible = None
+
+# Global variables
+check_mk_version = '1.2.2p3'
+tcp_connect_timeout = 5.0
+agent_min_version = 0
+perfdata_format = 'pnp'
+aggregation_output_format = 'multiline'
+aggr_summary_hostname = '%s-s'
+nagios_command_pipe_path = '/var/lib/nagios3/rw/nagios.cmd'
+check_result_path = '/var/lib/nagios3/spool/checkresults'
+check_submission = 'file'
+var_dir = '/home/nagios/check_mk/var'
+counters_directory = '/home/nagios/check_mk/var/counters'
+tcp_cache_dir = '/home/nagios/check_mk/var/cache'
+snmpwalks_dir = '/home/nagios/check_mk/var/snmpwalks'
+check_mk_basedir = '/home/nagios/check_mk'
+nagios_user = 'nagios'
+www_group = 1001
+cluster_max_cachefile_age = 90
+check_max_cachefile_age = 0
+simulation_mode = False
+agent_simulator = False
+aggregate_check_mk = False
+debug_log = '/var/log/nagios3/check_mk_debug.log'
+check_mk_perfdata_with_times = False
+livestatus_unix_socket = '/var/lib/nagios3/rw/live'
+
+# Checks for host3
+
+def get_sorted_check_table(hostname):
+    return [('memory', None, (150.0, 200.0), 'Memory used', '')]
+
+precompiled_service_timeperiods = {}
+def check_period_of(hostname, service):
+    return precompiled_service_timeperiods.get(service)
+
+check_info = {}
+check_includes = {}
+precompile_params = {}
+factory_settings = {}
+checkgroup_of = {}
+check_config_variables = []
+check_default_levels = {}
+snmp_info = {}
+snmp_scan_functions = {}
+# /home/nagios/check_mk/checks/mem.include
+
+memused_default_levels = (150.0, 200.0)
+mem_extended_perfdata = False
+
+def check_memory(params, mem_dict):
+    memory = devices.Memory(mem_dict)
+    meminfo = memory.get_device_dict()
+    try:
+        swapused = meminfo['swapTotal'] - meminfo['swapFree']
+        memused  = meminfo['used']
+        caches   = meminfo.get('buffers', 0) + meminfo.get('caches', 0)
+    except:
+        return (3, "UNKNOWN - invalid output from plugin")
+
+    extended_perf = []
+    extrainfo = ""
+    if mem_extended_perfdata:
+        mapped = meminfo.get('Mapped')
+        if mapped:
+            mapped_mb = int(mapped) / 1024
+            committed_as = meminfo.get('Committed_AS')
+            if committed_as:
+                committed_as_mb = int(committed_as) / 1024
+            else:
+                committed_as = 0
+            extended_perf = [
+                ('mapped',       str(mapped_mb)       + 'MB', '', '', 0, ''),
+                ('committed_as', str(committed_as_mb) + 'MB', '', '', 0, ''),
+            ]
+            extrainfo = ", %.1f GB mapped, %.1f GB committed" % \
+                        (mapped_mb / 1024.0, committed_as_mb / 1024.0)
+
+    totalused_kb = (swapused + memused - caches)
+    totalused_mb = totalused_kb / 1024
+    totalmem_kb = meminfo['total']
+    totalmem_mb = totalmem_kb / 1024
+    totalused_perc = 100 * (float(totalused_kb) / float(totalmem_kb))
+    totalvirt_mb = (meminfo['swapTotal'] + meminfo['total']) / 1024
+    warn, crit = params
+
+    perfdata = [
+        ('ramused', str( (memused - caches) / 1024) + 'MB', '', '', 0, totalmem_mb),
+        ('swapused', str(swapused / 1024) + 'MB', '', '', 0, meminfo['swapTotal']/1024) ]
+
+
+    infotext = ("%.2f GB used (%.2f GB RAM + %.2f GB SWAP, this is %.1f%% of %.2f GB RAM)" % \
+               (totalused_mb / 1024.0, (memused-caches) / 1024.0 / 1024, swapused / 1024.0 / 1024,
+               totalused_perc, totalmem_mb / 1024.0)) \
+               + extrainfo
+
+    if type(warn) == float:
+        perfdata.append(('memused', str(totalused_mb)+'MB', int(warn/100.0 * totalmem_mb),
+                        int(crit/100.0 * totalmem_mb), 0, totalvirt_mb))
+        perfdata += extended_perf
+        if totalused_perc >= crit:
+            return (2, 'CRIT - %s, critical at %.1f%%' % (infotext, crit), perfdata)
+        elif totalused_perc >= warn:
+            return (1, 'WARN - %s, warning at %.1f%%' % (infotext, warn), perfdata)
+        else:
+            return (0, 'OK - %s' % infotext, perfdata)
+
+    else:
+        perfdata.append(('memused', str(totalused_mb)+'MB', warn, crit, 0, totalvirt_mb))
+        perfdata += extended_perf
+        if totalused_mb >= crit:
+            return (2, 'CRIT - %s, critical at %.2f GB' % (infotext, crit / 1024.0), perfdata)
+        elif totalused_mb >= warn:
+            return (1, 'WARN - %s, warning at %.2f GB' % (infotext, warn / 1024.0), perfdata)
+        else:
+            return (0, 'OK - %s' % infotext, perfdata)
+
+
+
+# /home/nagios/check_mk/checks/memory
+
+
+
+def parse_proc_meminfo(info):
+    return dict([ (i[0][:-1], int(i[1])) for i in info ])
+
+def inventory_mem_used(info):
+    meminfo = info
+    if "total" in meminfo and \
+        "PageTotal" not in meminfo: # This case is handled by mem.win
+        return [(None, "memused_default_levels")]
+
+def check_mem_used(_no_item, params, info):
+    meminfo = info
+    return check_memory(params, meminfo)
+
+check_info['memory'] = {
+    "check_function"         : check_mem_used,
+    "inventory_function"     : inventory_mem_used,
+    "service_description"    : "Memory used",
+    "has_perfdata"           : True,
+    "group"                  : "memory",
+    "check_config_variables" : [ "mem_extended_perfdata" ],
+    "includes"               : [ "mem.include" ],
+}
+
+
+
+check_default_levels['mem.win'] = "memory_win_default_levels"
+factory_settings["memory_win_default_levels"] = {
+    "memory"   : ( 80.0, 90.0 ),
+    "pagefile" : ( 50.0, 70.0 ),
+}
+
+def inventory_mem_win(info):
+    meminfo = parse_proc_meminfo(info)
+    if "PageTotal" in meminfo:
+        return [(None, {})]
+
+def check_mem_windows(item, params, info):
+    meminfo = parse_proc_meminfo(info)
+    perfdata = []
+    infotxts = []
+    MB = 1024.0 * 1024
+    worststate = 0
+    for title, what, paramname in [
+        ( "Memory",    "Mem",  "memory" ),
+        ( "Page file", "Page", "pagefile" )]:
+        total_kb = meminfo[what + "Total"]
+        free_kb  = meminfo[what + "Free"]
+        used_kb  = total_kb - free_kb
+        used_mb  = used_kb / 1024.0
+        free_mb  = free_kb / 1024.0
+        perc     = 100.0 * used_kb / total_kb
+
+        warn, crit = params[paramname]
+        if (type(crit) == int and free_mb <= crit) or \
+            (type(crit) == float and perc >= crit):
+            worststate = 2
+            state_code = '(!!)'
+        elif (type(warn) == int and free_mb <= warn) or \
+            (type(warn) == float and perc >= warn):
+            worststate = max(worststate, 1)
+            state_code = '(!)'
+        else:
+            state_code = ""
+
+        if type(warn) == float:
+            warn = total_kb * warn / 100 / 1024
+        if type(crit) == float:
+            crit = total_kb * crit / 100 / 1024
+
+        infotxts.append("%s usage: %.1f%% (%.1f/%.1f GB)%s" %
+                (title, perc, used_kb / MB, total_kb / MB, state_code))
+        perfdata.append((paramname, used_kb / 1024.0, warn, crit, 0, total_kb / 1024.0))
+
+    return (worststate, "%s - %s" %
+            (nagios_state_names[worststate], ", ".join(infotxts)), perfdata)
+
+
+check_info['mem.win'] = (check_mem_windows, "Memory and pagefile", 1, inventory_mem_win)
+checkgroup_of['mem.win'] = "memory_pagefile_win"
+
+
+
+mem_vmalloc_default_levels = ( 80.0, 90.0, 64, 32 )
+
+def inventory_mem_vmalloc(info):
+    meminfo = parse_proc_meminfo(info)
+    if "VmallocTotal" in meminfo:
+        vmalloc = meminfo["VmallocTotal"] / 1024.4
+        if vmalloc < 4096:
+            return [ (None, "mem_vmalloc_default_levels") ]
+    return []
+
+def check_mem_vmalloc(item, params, info):
+    meminfo = parse_proc_meminfo(info)
+    total_mb = meminfo["VmallocTotal"] / 1024.0
+    used_mb  = meminfo["VmallocUsed"] / 1024.0
+    free_mb  = total_mb - used_mb
+    chunk_mb = meminfo["VmallocChunk"] / 1024.0
+    warn, crit, warn_chunk, crit_chunk = params
+
+    state = 0
+    infotxts = []
+    perfdata = []
+    for var, w, c, v, neg, what in [
+        ( "used",  warn,       crit,       used_mb,  False, "used" ),
+        ( "chunk", warn_chunk, crit_chunk, chunk_mb, True,  "largest chunk" )]:
+
+        if type(w) == float:
+            w_mb = total_mb * w / 100
+        else:
+            w_mb = float(w)
+
+        if type(c) == float:
+            c_mb = total_mb * c / 100
+        else:
+            c_mb = float(c)
+
+        infotxt = "%s %.1f MB" % (what, v)
+        if (v >= c_mb) != neg:
+            s = 2
+            infotxt += " (critical at %.1f MB!!)" % c_mb
+        elif (v >= w_mb) != neg:
+            s = 1
+            infotxt += " (warning at %.1f MB!)" % w_mb
+        else:
+            s = 0
+        state = max(state, s)
+        infotxts.append(infotxt)
+        perfdata.append( (var, v, w_mb, c_mb, 0, total_mb) )
+    return (state, nagios_state_names[state] + (" - total %.1f MB, " % total_mb) + ", ".join(infotxts), perfdata)
+
+check_info["mem.vmalloc"] = (check_mem_vmalloc, "Vmalloc address space", 1, inventory_mem_vmalloc)
+
+
+convert_check_info()
+clusters = {}
+def is_cluster(hostname):
+    return False
+
+def is_snmp_host(hostname):
+   return False
+
+def is_tcp_host(hostname):
+   return True
+
+def snmp_walk_command(hostname):
+   return "snmpbulkwalk -v2c -c 'public' -m '' -M '' -Cc"
+
+def is_usewalk_host(hostname):
+   return False
+
+ipaddresses = {'host3': '10.117.5.79'}
+
+def lookup_ipaddress(hostname):
+   return ipaddresses.get(hostname)
+
+def get_datasource_program(hostname, ipaddress):
+    return {'host3': None}[hostname]
+
+def host_is_aggregated(hostname):
+    return False
+
+def agent_port_of(hostname):
+    return 6556
+
+def snmp_port_spec(hostname):
+    return ''
+
+def get_snmp_character_encoding(hostname):
+    return None
+
+nagios_illegal_chars = '`;~!$%^&*|\'"<>?,()='
+cmctc_pcm_m_sensor_types = {72: 'kW', 73: 'kW', 74: 'hz', 75: 'V', 77: 'A', 79: 'kW', 80: 'kW'}
+heartbeat_crm_naildown = True
+heartbeat_crm_resources_naildown = True
+ipmi_ignore_nr = False
+ipmi_ignored_sensors = []
+logwatch_dir = '/home/nagios/check_mk/var/logwatch'
+logwatch_max_filesize = 500000
+logwatch_service_output = 'default'
+netctr_counters = ['rx_bytes', 'tx_bytes', 'rx_packets', 'tx_packets', 'rx_errors', 'tx_errors', 'tx_collisions']
+oracle_tablespaces_check_default_increment = True
+printer_alerts_state_map = {0: [1, 4, 6, 7, 19, 20, 22, 23, 24, 25, 27, 35, 36, 37, 38, 502, 503, 504, 505, 506, 507, 802, 803, 804, 805, 806, 807, 808, 809, 810, 1001, 1002, 1005, 1106, 1107, 1108, 1111, 1113, 1302, 1304, 1501, 1502, 1503, 1504, 1505, 1506, 1509], 1: [2, 9, 12, 13, 801, 1104], 2: [8, 1101, 1102, 1112, 1114, 1115]}
+printer_alerts_text_map = {'Energiesparen': 0}
+printer_supply_some_remaining_status = 1
+winperf_cpu_default_levels = (101.0, 101.0)
+winperf_msx_queues = {'Retry Remote Delivery': '4', 'Active Remote Delivery': '2', 'Poison Queue Length': '44', 'Active Mailbox Delivery': '6'}
+mem_extended_perfdata = False
+try:
+    do_check('host3', '10.117.5.79')
+except SystemExit, e:
+    sys.exit(e.code)
+except Exception, e:
+    import traceback, pprint
+    sys.stdout.write("UNKNOWN - Exception in precompiled check: %s (details in long output)\n" % e)
+    sys.stdout.write("Traceback: %s\n" % traceback.format_exc())
+    if debug_log:
+        l = file(debug_log, "a")
+        l.write(("Exception in precompiled check:\n"
+                "  Check_MK Version: %s\n"
+                "  Date:             %s\n"
+                "  Host:             %s\n"
+                "  %s\n") % (
+                check_mk_version,
+                time.strftime("%Y-%d-%m %H:%M:%S"),
+                "host3",
+                traceback.format_exc().replace('\n', '\n      ')))
+        l.close()
+    sys.exit(3)

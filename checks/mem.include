@@ -27,9 +27,11 @@
 memused_default_levels = (150.0, 200.0)
 mem_extended_perfdata = False
 
-def check_memory(params, meminfo):
+def check_memory(params, mem_dict):
+    memory = devices.Memory(mem_dict)
+    meminfo = memory.get_device_dict()
     try:
-        swapused = meminfo['SwapTotal'] - meminfo['SwapFree']
+        swapused = meminfo['swapTotal'] - meminfo['swapFree']
         memused  = meminfo['used']
         # Buffers and Cached are optional (not supported on Windows yet)
         caches   = meminfo.get('buffers', 0) + meminfo.get('caches', 0)
@@ -61,12 +63,12 @@ def check_memory(params, meminfo):
     totalmem_kb = meminfo['total']
     totalmem_mb = totalmem_kb / 1024
     totalused_perc = 100 * (float(totalused_kb) / float(totalmem_kb))
-    totalvirt_mb = (meminfo['SwapTotal'] + meminfo['MemTotal']) / 1024
+    totalvirt_mb = (meminfo['swapTotal'] + meminfo['total']) / 1024
     warn, crit = params
 
     perfdata = [
         ('ramused', str( (memused - caches) / 1024) + 'MB', '', '', 0, totalmem_mb),
-        ('swapused', str(swapused / 1024) + 'MB', '', '', 0, meminfo['SwapTotal']/1024) ]
+        ('swapused', str(swapused / 1024) + 'MB', '', '', 0, meminfo['swapTotal']/1024) ]
 
     # levels may be given either in int -> MB or in float -> percentages
 

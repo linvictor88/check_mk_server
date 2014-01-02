@@ -27,8 +27,8 @@
 # This file is also read in by check_mk's web pages. In that case,
 # the variable check_mk_web is set to True
 
-import pdb
 import os, sys, socket, time, getopt, glob, re, stat, py_compile, urllib, inspect
+import pdb
 
 # These variable will be substituted at 'make dist' time
 check_mk_version  = '(inofficial)'
@@ -154,7 +154,6 @@ except Exception, e:
 
 
 if __name__ == "__main__":
-    pdb.set_trace()
     try:
         i = sys.argv.index('-c')
         if i > 0 and i < len(sys.argv)-1:
@@ -2582,6 +2581,7 @@ def get_precompiled_check_table(hostname):
     return precomp_table
 
 def precompile_hostchecks():
+    #pdb.set_trace()
     if not os.path.exists(precompiled_hostchecks_dir):
         os.makedirs(precompiled_hostchecks_dir)
     for host in all_active_hosts() + all_active_clusters():
@@ -2643,6 +2643,14 @@ if os.path.islink(%(dst)r):
 """ % { "src" : source_filename, "dst" : compiled_filename })
 
     output.write(stripped_python_file(modules_dir + "/check_mk_base.py"))
+
+    output.write("""
+# Import check_mk modules
+CHECK_MK_LIB_MODULE = os.path.join(os.path.dirname(__file__),
+                             '../..')
+sys.path.append(CHECK_MK_LIB_MODULE)
+from check_mk.devices import devices
+""")
 
     # initialize global variables
     output.write("""

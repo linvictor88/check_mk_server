@@ -1,0 +1,9 @@
+#!/usr/bin/python
+import sys
+
+#TODO(berlin): Add PYTHONPATH
+sys.path.append('/home/nagios/check_mk')
+from check_mk_agent_linux import main
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -41,13 +41,15 @@ def parse_proc_meminfo(info):
     return dict([ (i[0][:-1], int(i[1])) for i in info ])
 
 def inventory_mem_used(info):
-    meminfo = parse_proc_meminfo(info)
-    if "MemTotal" in meminfo and \
+    #meminfo = parse_proc_meminfo(info)
+    meminfo = info
+    if "total" in meminfo and \
         "PageTotal" not in meminfo: # This case is handled by mem.win
         return [(None, "memused_default_levels")]
 
 def check_mem_used(_no_item, params, info):
     #meminfo = parse_proc_meminfo(info)
+    meminfo = info
     return check_memory(params, meminfo)
 
 check_info['memory'] = {
