@@ -65,6 +65,8 @@ def inventory_cpu_threads(info):
         return [(None, "", "threads_default_levels")]
 
 def check_cpu(item, params, info):
+    if not info:
+        return (3, "UNKNOW - no output from plugin")
     global g_counters
     cpu = devices.Cpu(info)
     this_time = int(time.time())
@@ -80,6 +82,13 @@ def check_cpu(item, params, info):
     sum_jiffies = sum(diff_values[0:7]) # do not account for steal!
     if sum_jiffies == 0:
         return (0, "OK - too short interval")
+
+    cpu.update_device(user=diff_values[0], nice=diff_values[1],
+                      system=diff_values[2], idle=diff_values[3],
+                      iowait=diff_values[4], irq=diff_values[5],
+                      softirq=diff_values[6], steal=diff_values[7],
+                      total=sum_jiffies)
+
     user        = diff_values[0] + diff_values[1] # add user + nice
     system      = diff_values[2]
     wait        = diff_values[4]

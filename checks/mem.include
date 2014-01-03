@@ -28,6 +28,8 @@ memused_default_levels = (150.0, 200.0)
 mem_extended_perfdata = False
 
 def check_memory(params, mem_dict):
+    if not mem_dict:
+        return (3, "UNKNOWN - no output from plugin ")
     memory = devices.Memory(mem_dict)
     meminfo = memory.get_device_dict()
     try:

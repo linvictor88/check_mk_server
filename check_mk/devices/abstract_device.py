@@ -57,3 +57,8 @@ class AbstractDevice(object):
             data = _("%(timestamp)d %(value)s\n" % {'timestamp': timestamp,
                                                   'value': v})
             utils.write_file(file_name, data)  
+
+    def update_device(self, **kwargs):
+        device_dict = self.get_device_dict()
+        device_dict.update(kwargs)
+        self.init_device(device_dict)
