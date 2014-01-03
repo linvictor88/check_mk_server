@@ -894,7 +894,13 @@ def do_all_checks_on_host(hostname, ipaddress, only_check_types = None):
 
             try:
                 dont_submit = False
-                result = check_function(item, params, info)
+                results = check_function(item, params, info)
+                # device obj not included
+                if len(results) != 2:
+                    result = results
+                    device = None
+                else:
+                    result, device = results
             # handle check implementations that do not yet support the
             # handling of wrapped counters via exception. Do not submit
             # any check result in that case:
@@ -928,6 +934,12 @@ def do_all_checks_on_host(hostname, ipaddress, only_check_types = None):
 
                 if opt_debug:
                     raise
+            if device:
+                if debug_log:
+                    l = file(debug_log, "a")
+                    l.write("Device Debug: hostname: %s\n" % hostname)
+                    l.write("Device Debug: device data: %s\n" % device.get_device_dict())
+                device.write_device_file(hostname)
             if not dont_submit:
                 submit_check_result(hostname, description, result, aggrname)
         else:

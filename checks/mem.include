@@ -82,19 +82,19 @@ def check_memory(params, mem_dict):
                         int(crit/100.0 * totalmem_mb), 0, totalvirt_mb))
         perfdata += extended_perf
         if totalused_perc >= crit:
-            return (2, 'CRIT - %s, critical at %.1f%%' % (infotext, crit), perfdata)
+            return ((2, 'CRIT - %s, critical at %.1f%%' % (infotext, crit), perfdata), memory)
         elif totalused_perc >= warn:
-            return (1, 'WARN - %s, warning at %.1f%%' % (infotext, warn), perfdata)
+            return ((1, 'WARN - %s, warning at %.1f%%' % (infotext, warn), perfdata), memory)
         else:
-            return (0, 'OK - %s' % infotext, perfdata)
+            return ((0, 'OK - %s' % infotext, perfdata), memory)
 
     else:
         perfdata.append(('memused', str(totalused_mb)+'MB', warn, crit, 0, totalvirt_mb))
         perfdata += extended_perf
         if totalused_mb >= crit:
-            return (2, 'CRIT - %s, critical at %.2f GB' % (infotext, crit / 1024.0), perfdata)
+            return ((2, 'CRIT - %s, critical at %.2f GB' % (infotext, crit / 1024.0), perfdata), memory)
         elif totalused_mb >= warn:
-            return (1, 'WARN - %s, warning at %.2f GB' % (infotext, warn / 1024.0), perfdata)
+            return ((1, 'WARN - %s, warning at %.2f GB' % (infotext, warn / 1024.0), perfdata), memory)
         else:
-            return (0, 'OK - %s' % infotext, perfdata)
+            return ((0, 'OK - %s' % infotext, perfdata), memory)
 

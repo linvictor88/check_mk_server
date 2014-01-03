@@ -28,6 +28,7 @@ from eventlet.green import subprocess
 from eventlet import greenthread
 
 from check_mk.common import utils
+from check_mk.openstack.common import fileutils
 from check_mk.openstack.common import log as logging
 
 
@@ -108,3 +109,10 @@ def replace_file(file_name, data):
     tmp_file.close()
     os.chmod(tmp_file.name, 0o644)
     os.rename(tmp_file.name, file_name)
+
+def write_file(file_name, data):
+    """Write data into file with append pattern."""
+
+    tmp_file = fileutils.file_open(file_name, "a+")
+    tmp_file.write(data)
+    tmp_file.close()

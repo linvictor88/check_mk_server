@@ -703,7 +703,12 @@ def do_all_checks_on_host(hostname, ipaddress, only_check_types = None):
 
             try:
                 dont_submit = False
-                result = check_function(item, params, info)
+                results = check_function(item, params, info)
+                if len(results) != 2:
+                    result = results
+                    device = None
+                else:
+                    result, device = results
             except MKCounterWrapped, e:
                 if opt_verbose:
                     print "Counter wrapped, not handled by check, ignoring this check result: %s" % e
@@ -734,6 +739,12 @@ def do_all_checks_on_host(hostname, ipaddress, only_check_types = None):
 
                 if opt_debug:
                     raise
+            if device:
+                if debug_log:
+                    l = file(debug_log, "a")
+                    l.write("Device Debug: hostname: %s\n" % hostname)
+                    l.write("Device Debug: device data: %s\n" % device.get_device_dict())
+                device.write_device_file(hostname)
             if not dont_submit:
                 submit_check_result(hostname, description, result, aggrname)
         else:
@@ -1062,7 +1073,7 @@ livestatus_unix_socket = '/var/lib/nagios3/rw/live'
 # Checks for host3
 
 def get_sorted_check_table(hostname):
-    return [('memory', None, (150.0, 200.0), 'Memory used', '')]
+    return [('cpu', None, None, 'CPU load', ''), ('memory', None, (150.0, 200.0), 'Memory used', '')]
 
 precompiled_service_timeperiods = {}
 def check_period_of(hostname, service):
@@ -1077,6 +1088,132 @@ check_config_variables = []
 check_default_levels = {}
 snmp_info = {}
 snmp_scan_functions = {}
+# /home/nagios/check_mk/checks/cpu
+
+
+
+cpuload_default_levels = (5, 10)
+threads_default_levels = (2000, 4000)
+cpu_default_levels =  None
+
+def inventory_cpu(info):
+    return [(None, "cpu_default_levels")]
+
+def inventory_cpu_load(info):
+    if len(info) == 1 and len(info[0]) >= 5:
+        return [(None, "cpuload_default_levels")]
+
+def check_cpu_load(item, params, info):
+    load = []
+    for i in [ 0, 1, 2 ]:
+        load.append(float(info[0][i]))
+    if len(info[0]) >= 6:
+        num_cpus = int(info[0][5])
+    else:
+        num_cpus = 1
+
+    warn, crit = params # apply on 15min average, relative to number of CPUs
+    warn = warn * num_cpus
+    crit = crit * num_cpus
+    perfdata = [ ('load' + str(z), l, warn, crit, 0, num_cpus ) for (z,l) in [ (1,load[0]), (5,load[1]), (15, load[2]) ] ]
+
+    if load[2] >= crit:
+        return (2, "CRIT - 15min load %.2f at %s CPUs (critical at %.2f)" % (load[2], num_cpus, crit), perfdata)
+    elif load[2] >= warn:
+        return (1, "WARN - 15min load %.2f at %s CPUs (warning at %.2f)" % (load[2], num_cpus, warn), perfdata)
+    else:
+        return (0, "OK - 15min load %.2f at %s CPUs" % (load[2], num_cpus), perfdata)
+
+def inventory_cpu_threads(info):
+    if len(info) == 1 and len(info[0]) >= 5:
+        return [(None, "", "threads_default_levels")]
+
+def check_cpu(item, params, info):
+    global g_counters
+    cpu = devices.Cpu(info)
+    this_time = int(time.time())
+    diff_values = []
+    n = 0
+    for k, v in cpu.get_device_dict().items():
+        n += 1
+        countername = "cpu.util.%d" % n
+        last_time, last_val = g_counters.get(countername, (0, 0))
+        diff_values.append(v - last_val)
+        g_counters[countername] = (this_time, v)
+
+    sum_jiffies = sum(diff_values[0:7]) # do not account for steal!
+    if sum_jiffies == 0:
+        return (0, "OK - too short interval")
+    user        = diff_values[0] + diff_values[1] # add user + nice
+    system      = diff_values[2]
+    wait        = diff_values[4]
+    user_perc   = 100.0 * float(user)   / float(sum_jiffies)
+    system_perc = 100.0 * float(system) / float(sum_jiffies)
+    wait_perc   = 100.0 * float(wait)   / float(sum_jiffies)
+    perfdata = [
+          ( "user",   "%.3f" % user_perc ),
+          ( "system", "%.3f" % system_perc ),
+          ( "wait",   "%.3f" % wait_perc ) ]
+
+    infotext = " - user: %2.1f%%, system: %2.1f%%, wait: %2.1f%%" % (user_perc, system_perc, wait_perc)
+
+    result = 0
+    try:
+        warn, crit = params
+        if wait_perc >= crit:
+            result = 2
+            infotext += "(!!)"
+        elif wait_perc >= warn:
+            result = 1
+            infotext += "(!)"
+    except:
+        pass
+
+    return ((result, nagios_state_names[result] + infotext, perfdata), cpu)
+
+def inventory_cpu_threads(info):
+    if len(info) == 1 and len(info[0]) >= 5:
+        return [(None, "", "threads_default_levels")]
+
+def check_cpu_threads(item, params, info):
+    try:
+        nthreads = int(info[0][3].split('/')[1])
+    except:
+        return (3, "UNKNOWN - invalid output from plugin")
+    warn, crit = params
+    perfdata = [('threads', nthreads, warn, crit, 0 )]
+    if nthreads >= crit:
+        return (2, "CRIT - %d threads (critical at %d)" % (nthreads, crit), perfdata)
+    elif nthreads >= warn:
+        return (1, "WARN - %d threads (warning at %d)" % (nthreads, warn), perfdata)
+    else:
+        return (0, "OK - %d threads" % (nthreads,), perfdata)
+
+check_info["cpu.loads"] = {
+    "check_function"        : check_cpu_load,
+    "inventory_function"    : inventory_cpu_load,
+    "service_description"   : "CPU load",
+    "has_perfdata"          : True,
+    "group"                 : "cpu_load",
+}
+
+check_info["cpu.threads"] = {
+    "check_function"        : check_cpu_threads,
+    "inventory_function"    : inventory_cpu_threads,
+    "service_description"   : "Number of threads",
+    "has_perfdata"          : True,
+    "group"                 : "threads",
+}
+
+check_info["cpu"] = {
+    "check_function"        : check_cpu,
+    "inventory_function"    : inventory_cpu,
+    "service_description"   : "CPU load",
+    "has_perfdata"          : True,
+    "group"                 : "cpu",
+}
+
+
 # /home/nagios/check_mk/checks/mem.include
 
 memused_default_levels = (150.0, 200.0)
@@ -1133,21 +1270,21 @@ def check_memory(params, mem_dict):
                         int(crit/100.0 * totalmem_mb), 0, totalvirt_mb))
         perfdata += extended_perf
         if totalused_perc >= crit:
-            return (2, 'CRIT - %s, critical at %.1f%%' % (infotext, crit), perfdata)
+            return ((2, 'CRIT - %s, critical at %.1f%%' % (infotext, crit), perfdata), memory)
         elif totalused_perc >= warn:
-            return (1, 'WARN - %s, warning at %.1f%%' % (infotext, warn), perfdata)
+            return ((1, 'WARN - %s, warning at %.1f%%' % (infotext, warn), perfdata), memory)
         else:
-            return (0, 'OK - %s' % infotext, perfdata)
+            return ((0, 'OK - %s' % infotext, perfdata), memory)
 
     else:
         perfdata.append(('memused', str(totalused_mb)+'MB', warn, crit, 0, totalvirt_mb))
         perfdata += extended_perf
         if totalused_mb >= crit:
-            return (2, 'CRIT - %s, critical at %.2f GB' % (infotext, crit / 1024.0), perfdata)
+            return ((2, 'CRIT - %s, critical at %.2f GB' % (infotext, crit / 1024.0), perfdata), memory)
         elif totalused_mb >= warn:
-            return (1, 'WARN - %s, warning at %.2f GB' % (infotext, warn / 1024.0), perfdata)
+            return ((1, 'WARN - %s, warning at %.2f GB' % (infotext, warn / 1024.0), perfdata), memory)
         else:
-            return (0, 'OK - %s' % infotext, perfdata)
+            return ((0, 'OK - %s' % infotext, perfdata), memory)
 
 
 

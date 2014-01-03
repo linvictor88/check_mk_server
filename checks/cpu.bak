@@ -30,10 +30,6 @@
 
 cpuload_default_levels = (5, 10)
 threads_default_levels = (2000, 4000)
-cpu_default_levels =  None
-
-def inventory_cpu(info):
-    return [(None, "cpu_default_levels")]
 
 def inventory_cpu_load(info):
     if len(info) == 1 and len(info[0]) >= 5:
@@ -59,56 +55,6 @@ def check_cpu_load(item, params, info):
         return (1, "WARN - 15min load %.2f at %s CPUs (warning at %.2f)" % (load[2], num_cpus, warn), perfdata)
     else:
         return (0, "OK - 15min load %.2f at %s CPUs" % (load[2], num_cpus), perfdata)
-
-def inventory_cpu_threads(info):
-    if len(info) == 1 and len(info[0]) >= 5:
-        return [(None, "", "threads_default_levels")]
-
-def check_cpu(item, params, info):
-    global g_counters
-    cpu = devices.Cpu(info)
-    this_time = int(time.time())
-    diff_values = []
-    n = 0
-    for k, v in cpu.get_device_dict().items():
-        n += 1
-        countername = "cpu.util.%d" % n
-        last_time, last_val = g_counters.get(countername, (0, 0))
-        diff_values.append(v - last_val)
-        g_counters[countername] = (this_time, v)
-
-    sum_jiffies = sum(diff_values[0:7]) # do not account for steal!
-    if sum_jiffies == 0:
-        return (0, "OK - too short interval")
-    user        = diff_values[0] + diff_values[1] # add user + nice
-    system      = diff_values[2]
-    wait        = diff_values[4]
-    user_perc   = 100.0 * float(user)   / float(sum_jiffies)
-    system_perc = 100.0 * float(system) / float(sum_jiffies)
-    wait_perc   = 100.0 * float(wait)   / float(sum_jiffies)
-    perfdata = [
-          ( "user",   "%.3f" % user_perc ),
-          ( "system", "%.3f" % system_perc ),
-          ( "wait",   "%.3f" % wait_perc ) ]
-
-    infotext = " - user: %2.1f%%, system: %2.1f%%, wait: %2.1f%%" % (user_perc, system_perc, wait_perc)
-
-    # You may set a warning/critical level on the io wait
-    # percentage. This can be done by setting params to
-    # a pair of (warn, crit)
-    result = 0
-    try:
-        warn, crit = params
-        if wait_perc >= crit:
-            result = 2
-            infotext += "(!!)"
-        elif wait_perc >= warn:
-            result = 1
-            infotext += "(!)"
-    except:
-        pass
-
-    return ((result, nagios_state_names[result] + infotext, perfdata), cpu)
 
 def inventory_cpu_threads(info):
     if len(info) == 1 and len(info[0]) >= 5:
@@ -144,10 +90,3 @@ check_info["cpu.threads"] = {
     "group"                 : "threads",
 }
 
-check_info["cpu"] = {
-    "check_function"        : check_cpu,
-    "inventory_function"    : inventory_cpu,
-    "service_description"   : "CPU load",
-    "has_perfdata"          : True,
-    "group"                 : "cpu",
-}

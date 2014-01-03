@@ -46,6 +46,8 @@ def main():
     #hosts = {'hosts':[]}
     host = {'memory': memory.get_device_dict()}
     #hosts['hosts'].append(host)
+    cpu = devices.Cpu()
+    host['cpu'] = cpu.get_device_dict()
     print host
     
     
