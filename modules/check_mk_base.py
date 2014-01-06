@@ -845,6 +845,7 @@ def do_all_checks_on_host(hostname, ipaddress, only_check_types = None):
     error_sections = set([])
     check_table = get_sorted_check_table(hostname)
     problems = []
+    device = None
 
     for checkname, item, params, description, info in check_table:
         if only_check_types != None and checkname not in only_check_types:
@@ -898,7 +899,6 @@ def do_all_checks_on_host(hostname, ipaddress, only_check_types = None):
                 # device obj not included
                 if len(results) != 2:
                     result = results
-                    device = None
                 else:
                     result, device = results
             # handle check implementations that do not yet support the
@@ -930,6 +930,8 @@ def do_all_checks_on_host(hostname, ipaddress, only_check_types = None):
                                 traceback.format_exc().replace('\n', '\n      '),
                                 pprint.pformat(info)))
                     except:
+                        l = file(debug_log, "a")
+                        l.write("Failed to trace the error!")
                         pass
 
                 if opt_debug:
@@ -938,7 +940,7 @@ def do_all_checks_on_host(hostname, ipaddress, only_check_types = None):
                 if debug_log:
                     l = file(debug_log, "a")
                     l.write("Device Debug: hostname: %s\n" % hostname)
-                    l.write("Device Debug: device data: %s\n" % device.get_device_dict())
+                    l.write("Device Debug: device data (%s): %s\n" % (device.name, device.get_device_dict()))
                 device.write_device_file(hostname)
             if not dont_submit:
                 submit_check_result(hostname, description, result, aggrname)

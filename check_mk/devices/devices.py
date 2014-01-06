@@ -59,7 +59,9 @@ class Memory(abstract_device.AbstractDevice):
         self.active = device_dict['active']
 
 class Cpu(abstract_device.AbstractDevice):
-    """Cpu device data collector."""
+    """Cpu device data collector.
+    data is in units of USER_HZ (1/100ths of a seconds
+    on most architectures"""
 
     name = 'cpu'
     def get_plain_info(self):
@@ -93,6 +95,7 @@ class Cpu(abstract_device.AbstractDevice):
                 self.total = sum(v[0:7])
                 #TODO(berlin) how to calculate the usage
                 self.usage = None
+                self.userHz = os.sysconf(os.sysconf_names('SC_CLK_TCK'))
 
     def parse_proc_meminfo(self, plain_info):
         return dict([(i[0], i[1]) for i in plain_info ])
@@ -107,7 +110,8 @@ class Cpu(abstract_device.AbstractDevice):
                     'softirq': self.softirq,
                     'steal': self.steal,
                     'total': self.total,
-                    'count': self.count}
+                    'count': self.count,
+                    'userHz': self.userHz}
 
     def init_device(self, device_dict):
         self.count = device_dict['count']
@@ -120,6 +124,7 @@ class Cpu(abstract_device.AbstractDevice):
         self.softirq = device_dict['softirq']
         self.steal = device_dict['steal']
         self.total = device_dict['total']
+        self.userHz = device_dict['userHz']
 
 
 class System(abstract_device.AbstractDevice):
@@ -144,7 +149,11 @@ class System(abstract_device.AbstractDevice):
         self.uptime = device_dict['uptime']
 
 class Disks(abstract_device.AbstractDevice):
-    """Disk device data collector."""
+    """Disk device data collector.
+
+    readTput, writeTput are in units of bytes/sec,
+    latency is in units of milliseconds,
+    total is in units of KB"""
 
     name = 'disks'
     def get_plain_info(self):
@@ -204,18 +213,17 @@ class Disks(abstract_device.AbstractDevice):
                     'disks': self.disks}
 
     def init_device(self, device_dict):
-        self.time = device_dict['time']
         self.count = device_dict['count']
         self.disks = device_dict['disks']
 
     def write_device_file(self, hostname):
         """Write device data into file."""
         for disk in self.disks:
-            device_dir = os.path.join(DATA_BASE_DIR, hostname, self.name, disk['name'])
+            device_dir = os.path.join(abstract_device.DATA_BASE_DIR, hostname, self.name, disk['name'])
             if not os.path.isdir(device_dir):
                 os.makedirs(device_dir, 0o755)
             timestamp = int(time.time())
-            for k, v in self.get_device_dict().items():
+            for k, v in disk.items():
                 file_name = os.path.join(device_dir, k)
                 data = _("%(timestamp)d %(value)s\n" % {'timestamp': timestamp,
                                                   'value': v})

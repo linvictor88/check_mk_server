@@ -153,7 +153,7 @@ def check_disks(item, params, info):
     status = 0
     disks_get = disks.get_device_dict()['disks']
     for disk in disks_get:
-        for what, ctr in [ ("read-" + disk['name'],  disk['readTput']), ("write-", disk['writeTput']) ]:
+        for what, ctr in [ ("read-" + disk['name'],  disk['readTput']), ("write-" + disk['name'], disk['writeTput']) ]:
             countername = "disk.%s.%s" % (item, what)
 
             # unpack levels now, need also for perfdata
@@ -209,7 +209,7 @@ def check_disks(item, params, info):
             disk['latency'] = 0.0
         else:
             latency = timems_per_sec / ios_per_sec
-            disk['latency']  = Latency
+            disk['latency']  = latency
         infos.append("Latency-%s: %.2fms" % (disk['name'], latency))
         if "latency" in params:
             warn, crit = params["latency"]
@@ -223,9 +223,9 @@ def check_disks(item, params, info):
             warn, crit = None, None
 
         perfdata.append(("latency-" + disk['name'], latency))
-    disks.update_device('disks'=disks_get)
+    disks.update_device(disks=disks_get)
 
-    return (status, nagios_state_names[status] + " - " + ", ".join(infos) , perfdata)
+    return ((status, nagios_state_names[status] + " - " + ", ".join(infos) , perfdata), disks)
 
 check_info['disks'] = (check_disks, "Disks %s", 1,  inventory_disk)
 checkgroup_of["disks"] = "disks"

@@ -70,28 +70,30 @@ def check_cpu(item, params, info):
     global g_counters
     cpu = devices.Cpu(info)
     this_time = int(time.time())
-    diff_values = []
+    diff_values = {}
     n = 0
     for k, v in cpu.get_device_dict().items():
-        n += 1
-        countername = "cpu.util.%d" % n
+        countername = "cpu.util.%s" % k
         last_time, last_val = g_counters.get(countername, (0, 0))
-        diff_values.append(v - last_val)
+        diff_values[k] = (v - last_val)
         g_counters[countername] = (this_time, v)
+        #if debug_log:
+        #    l = file(debug_log, "a")
+        #    l.write("cpu %s: %s\n" % (k, v-last_val))
 
-    sum_jiffies = sum(diff_values[0:7]) # do not account for steal!
+    sum_jiffies = diff_values['total'] # do not account for steal!
     if sum_jiffies == 0:
         return (0, "OK - too short interval")
 
-    cpu.update_device(user=diff_values[0], nice=diff_values[1],
-                      system=diff_values[2], idle=diff_values[3],
-                      iowait=diff_values[4], irq=diff_values[5],
-                      softirq=diff_values[6], steal=diff_values[7],
+    cpu.update_device(user=diff_values['user'], nice=diff_values['nice'],
+                      system=diff_values['system'], idle=diff_values['idle'],
+                      iowait=diff_values['iowait'], irq=diff_values['irq'],
+                      softirq=diff_values['softirq'], steal=diff_values['steal'],
                       total=sum_jiffies)
 
-    user        = diff_values[0] + diff_values[1] # add user + nice
-    system      = diff_values[2]
-    wait        = diff_values[4]
+    user        = diff_values['user'] + diff_values['nice'] # add user + nice
+    system      = diff_values['system']
+    wait        = diff_values['iowait']
     user_perc   = 100.0 * float(user)   / float(sum_jiffies)
     system_perc = 100.0 * float(system) / float(sum_jiffies)
     wait_perc   = 100.0 * float(wait)   / float(sum_jiffies)
