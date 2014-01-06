@@ -85,11 +85,14 @@ def check_cpu(item, params, info):
     if sum_jiffies == 0:
         return (0, "OK - too short interval")
 
+    usage = 100 * float(sum_jiffies - diff_values['idle']) / float(sum_jiffies)
+
     cpu.update_device(user=diff_values['user'], nice=diff_values['nice'],
                       system=diff_values['system'], idle=diff_values['idle'],
                       iowait=diff_values['iowait'], irq=diff_values['irq'],
                       softirq=diff_values['softirq'], steal=diff_values['steal'],
-                      total=sum_jiffies)
+                      total=sum_jiffies,
+                      usage=usage)
 
     user        = diff_values['user'] + diff_values['nice'] # add user + nice
     system      = diff_values['system']

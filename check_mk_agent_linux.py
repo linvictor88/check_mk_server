@@ -53,6 +53,8 @@ def main():
     host['system'] = system.get_device_dict()
     disks = devices.Disks()
     host['disks'] = disks.get_device_dict()
+    nets = devices.Nets()
+    host['nets'] = nets.get_device_dict()
     print json.dumps(host, indent=4)
     
     

@@ -95,7 +95,7 @@ class Cpu(abstract_device.AbstractDevice):
                 self.total = sum(v[0:7])
                 #TODO(berlin) how to calculate the usage
                 self.usage = None
-                self.userHz = os.sysconf(os.sysconf_names('SC_CLK_TCK'))
+                self.userHz = os.sysconf(os.sysconf_names['SC_CLK_TCK'])
 
     def parse_proc_meminfo(self, plain_info):
         return dict([(i[0], i[1]) for i in plain_info ])
@@ -111,7 +111,8 @@ class Cpu(abstract_device.AbstractDevice):
                     'steal': self.steal,
                     'total': self.total,
                     'count': self.count,
-                    'userHz': self.userHz}
+                    'userHz': self.userHz,
+                    'usage': self.usage}
 
     def init_device(self, device_dict):
         self.count = device_dict['count']
@@ -125,6 +126,7 @@ class Cpu(abstract_device.AbstractDevice):
         self.steal = device_dict['steal']
         self.total = device_dict['total']
         self.userHz = device_dict['userHz']
+        self.usage = device_dict['usage']
 
 
 class System(abstract_device.AbstractDevice):
@@ -224,6 +226,72 @@ class Disks(abstract_device.AbstractDevice):
                 os.makedirs(device_dir, 0o755)
             timestamp = int(time.time())
             for k, v in disk.items():
+                file_name = os.path.join(device_dir, k)
+                data = _("%(timestamp)d %(value)s\n" % {'timestamp': timestamp,
+                                                  'value': v})
+                utils.write_file(file_name, data)  
+
+
+class Nets(abstract_device.AbstractDevice):
+    """net devices data collector.
+
+    inOctets, outOctets, tput are in units of Bytes"""
+
+    name = 'memory'
+
+    def get_plain_info(self):
+        cmd = ['cat', '/proc/net/dev']
+        plain_info = [line.split(':')
+                      for line in utils.execute(cmd).split('\n')
+                      if line]
+        del plain_info[:2]
+        LOG.debug(_("plain_info: %s"), plain_info)
+        return plain_info
+
+    def parse_plain_info(self, plain_info):
+        netinfo = {}
+        for line in plain_info:
+            k = line[0].strip()
+            v = line[1]
+            netinfo[k] = map(lambda x: int(x), v.split())
+            netstat = 'cat /sys/class/net/' + k +'/carrier'
+            netcmd = netstat.split(' ')
+            try:
+                output = int(utils.execute(netcmd))
+            except Exception:
+                output = 0
+            if output:
+                netinfo[k].append(1)
+            else:
+                netinfo[k].append(0)
+        self.nets = []
+        for name, v in netinfo.items():
+            net = {}
+            net['name'] = name
+            net['inOctets'] = v[0]
+            net['outOctets'] = v[8]
+            net['intfErrs'] = v[2] + v[10]
+            net['intfState'] = v[16]
+            net['tput'] = v[0] + v[8]
+            net['pktRate'] = v[1] + v[7] + v[9]
+            #TODO(berlin): It seems that perf can test the bandwidth
+            net['bandwidth'] = None
+            self.nets.append(net)
+
+    def get_device_dict(self):
+        return {'nets': self.nets}
+
+    def init_device(self, device_dict):
+        self.nets = device_dict['nets']
+
+    def write_device_file(self, hostname):
+        """Write device data into file."""
+        for net in self.nets:
+            device_dir = os.path.join(abstract_device.DATA_BASE_DIR, hostname, self.name, net['name'])
+            if not os.path.isdir(device_dir):
+                os.makedirs(device_dir, 0o755)
+            timestamp = int(time.time())
+            for k, v in net.items():
                 file_name = os.path.join(device_dir, k)
                 data = _("%(timestamp)d %(value)s\n" % {'timestamp': timestamp,
                                                   'value': v})
