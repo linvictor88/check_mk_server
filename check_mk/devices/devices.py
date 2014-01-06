@@ -1,6 +1,7 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
 import logging
+import os
 import re
 import time
 
@@ -134,7 +135,7 @@ class System(abstract_device.AbstractDevice):
         return plain_info
 
     def parse_plain_info(self, plain_info):
-        self.uptime = int(plain_info[0][0])
+        self.uptime = float(plain_info[0][0])
 
     def get_device_dict(self):
             return {'uptime': self.uptime}
@@ -148,44 +149,55 @@ class Disks(abstract_device.AbstractDevice):
     name = 'disks'
     def get_plain_info(self):
         """Get plain info of system."""
+        # Get df info
         excludefs="-x smbfs -x tmpfs -x devtmpfs -x cifs -x iso9660 -x udf -x nfsv4 -x nfs -x mvfs -x zfs"
-        df_cmd = ['df', '-PTlk', excludefs]
+        df_cmd = ['df', '-PTlk'] + excludefs.split()
         df_info = [line.split() 
                    for line in utils.execute(df_cmd).split('\n')
                    if line]
         del df_info[0]
+        mapping_df = {}
         for line in df_info:
             if os.path.islink(line[0]):
                 realpath = os.path.realpath(line[0])
                 line[0] = os.path.basename(realpath)
+            else:
+                line[0] = os.path.basename(line[0])
             mapping_df[line[0]] = line
+        LOG.debug(_("mapping_df: %s\n"), mapping_df)
 
+        # Get diskstat info
         disk_cmd = ['cat', '/proc/diskstats']
         p = re.compile('x?[shv]d[a-z]*|cciss/c[0-9]+d[0-9]+|emcpower[a-z]+|dm-[0-9]+|VxVM.*')
         disk_info = [line.split() 
                      for line in utils.execute(disk_cmd).split('\n')
                      if line and p.search(line)]
+        mapping_disk = {}
         for line in disk_info:
             mapping_disk[line[2]] = map(lambda x: int(x), line[:2]+line[3:14])
             mapping_disk[line[2]].insert(2, line[2])
+        LOG.debug(_("mapping_disk: %s\n"), mapping_disk)
 
+        mapping_info = {}
         for k, v in mapping_disk.items():
             if k in mapping_df.keys():
                 mapping_info[k] = mapping_disk[k] + mapping_df[k]
+        LOG.debug(_("mapping_info: %s\n"), mapping_info)
         return mapping_info
 
     def parse_plain_info(self, plain_info):
+        LOG.debug(_("parse_plain_info() called"))
         self.count = len(plain_info)
         self.disks = []
-        for name, v in plain_info:
+        for name, v in plain_info.items():
             disk = {'name': name}
             disk['readTput'] = v[5] 
             disk['writeTput'] =  v[9]
             disk['iops'] = v[3] + v[7]
             disk['latency'] = v[12]
-            disk['total'] = v[15]
-            disk['usage'] = v[18]
-            disks.append(disk)
+            disk['total'] = v[16]
+            disk['usage'] = v[19]
+            self.disks.append(disk)
         
     def get_device_dict(self):
             return {'count': self.count,
