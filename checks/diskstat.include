@@ -196,6 +196,8 @@ def check_diskstat_line(this_time, item, params, line):
 
 
 def check_diskstat_generic(item, params, this_time, info):
+    if not info:
+        return (3, "UNKNOW - no output from plugin")
     # legacy version if item is "read" or "write"
     if item in [ 'read', 'write' ]:
         return check_diskstat_old(item, params, this_time, info)
