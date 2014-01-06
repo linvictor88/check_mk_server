@@ -24,6 +24,7 @@
 # to the Free Software Foundation, Inc., 51 Franklin St,  Fifth Floor,
 # Boston, MA 02110-1301 USA.
 
+#the (warn, crit) threshold of memory usage
 memused_default_levels = (150.0, 200.0)
 mem_extended_perfdata = False
 

@@ -73,6 +73,8 @@ def check_cpu(item, params, info):
     diff_values = {}
     n = 0
     for k, v in cpu.get_device_dict().items():
+        if v is None:
+            continue
         countername = "cpu.util.%s" % k
         last_time, last_val = g_counters.get(countername, (0, 0))
         diff_values[k] = (v - last_val)

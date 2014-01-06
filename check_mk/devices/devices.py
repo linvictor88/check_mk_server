@@ -36,6 +36,7 @@ class Memory(abstract_device.AbstractDevice):
         self.caches = meminfo['Cached']
         self.buffers = meminfo['Buffers']
         self.active = meminfo['Active']
+        self.usage = float(self.used - self.caches - self.buffers) / float(self.total) * 100
 
     def parse_proc_meminfo(self, plain_info):
         return dict([(i[0][:-1], int(i[1])) for i in plain_info])
@@ -47,7 +48,8 @@ class Memory(abstract_device.AbstractDevice):
                 'swapFree': self.swapFree,
                 'caches': self.caches,
                 'buffers': self.buffers,
-                'active': self.active}
+                'active': self.active,
+                'usage': self.usage}
 
     def init_device(self, device_dict):
         self.total = device_dict['total']
@@ -57,6 +59,7 @@ class Memory(abstract_device.AbstractDevice):
         self.caches = device_dict['caches']
         self.buffers = device_dict['buffers']
         self.active = device_dict['active']
+        self.usage = device_dict['usage']
 
 class Cpu(abstract_device.AbstractDevice):
     """Cpu device data collector.
@@ -237,7 +240,7 @@ class Nets(abstract_device.AbstractDevice):
 
     inOctets, outOctets, tput are in units of Bytes"""
 
-    name = 'memory'
+    name = 'nets'
 
     def get_plain_info(self):
         cmd = ['cat', '/proc/net/dev']
