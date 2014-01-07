@@ -20,6 +20,8 @@ class AbstractDevice(object):
     """
     name = 'abstract_device'
     def __init__(self, device_dict=None):
+        #TODO(berlin): Here exists problems that None device_dict collected,
+        #Server must first check the output before initializing a device.
         if not device_dict:
             self.plain_info = self.get_plain_info()
             self.parse_plain_info(self.plain_info)
@@ -28,7 +30,7 @@ class AbstractDevice(object):
 
     @abc.abstractmethod
     def get_plain_info(self):
-        """Get the plain info of device through calling commands."""
+        """Get the plain info of device through calling shell commands."""
         pass
 
     @abc.abstractmethod
@@ -55,10 +57,11 @@ class AbstractDevice(object):
         for k, v in self.get_device_dict().items():
             file_name = os.path.join(device_dir, k)
             data = _("%(timestamp)d %(value)s\n" % {'timestamp': timestamp,
-                                                  'value': v})
+                                                    'value': v})
             utils.write_file(file_name, data)  
 
     def update_device(self, **kwargs):
+        """Update a device's data."""
         device_dict = self.get_device_dict()
         device_dict.update(kwargs)
         self.init_device(device_dict)

@@ -1,9 +1,15 @@
+Software dependency:
+    xinetd, python 2.6 or 2.7
 Python package dependency:
     eventlet, oslo.config, Paste, PasteDeploy, SQLAlchemy, Babel, iso8601
 
 HOW TO INSTALL Check_MK Agent
-    1. edit PYTHONPATH of bin/check_mk_agent_linux with appropriate path
+    1. edit PYTHONPATH(sys.path)of bin/check_mk_agent_linux with location of git project.
+        for example: check_user@host:~/check_server$: pwd to get the location 
     2. sudo cp bin/check_mk_agent_linux /usr/bin/
     3. sudo chmod a+x /usr/bin/check_mk_agent_linux
-    4. sudo cp ./xinetd.conf /etc/xinetd.conf/check_mk
+    4. sudo cp ./xinetd.conf /etc/xinetd.d/check_mk
     5. sudo /etc/init.d/xinetd restart
+
+Tests:
+    try using :$telnet -d IPADDRESS 6556 to get the locally initial raw data which would be processed by Server.
