@@ -11,5 +11,10 @@ HOW TO INSTALL Check_MK Agent
     4. sudo cp ./xinetd.conf /etc/xinetd.d/check_mk
     5. sudo /etc/init.d/xinetd restart
 
+HOW TO INSTALL Check_MK Server
+    1.****. edit main.mk to add hosts
+    2. check_mk --checks nets,system,memory,cpu,disks -I
+    3. sudo check_mk -R
+
 Tests:
     try using :$telnet -d IPADDRESS 6556 to get the locally initial raw data which would be processed by Server.

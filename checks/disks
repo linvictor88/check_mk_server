@@ -170,7 +170,7 @@ def check_disks(item, params, info):
                 disk['readTput'] = bytes_per_sec
             else:
                 disk['writeTput'] = bytes_per_sec
-            infos.append("%s/sec %s" % (get_bytes_human_readable(bytes_per_sec), what))
+            infos.append("%s: %s/sec" % (what, get_bytes_human_readable(bytes_per_sec)))
             perfdata.append( (what, bytes_per_sec, warn, crit) )
 
             # compute average of the rate over ___ minutes
@@ -198,7 +198,7 @@ def check_disks(item, params, info):
         ios_per_sec = None
         timedif, ios_per_sec = get_counter(countername + ".ios-" + disk['name'], this_time, disk['iops'])
         disk['iops'] = ios_per_sec
-        infos.append("IOs-%s: %.2f/sec" % (disk['name'], ios_per_sec))
+        infos.append("IOPs-%s: %.2f/sec" % (disk['name'], ios_per_sec))
 
         perfdata.append(("ios-" + disk['name'], ios_per_sec))
 

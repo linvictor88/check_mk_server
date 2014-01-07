@@ -161,6 +161,12 @@ class Disks(abstract_device.AbstractDevice):
     total is in units of KB"""
 
     name = 'disks'
+    def find_diskstat_value(self, mapping_disk, major, minor):
+        for k, v in mapping_disk.items():
+            if mapping_disk[k][0] == major and mapping_disk[k][1] == minor:
+                return mapping_disk[k]
+        return [0] * 14
+
     def get_plain_info(self):
         """Get plain info of system."""
         # Get df info
@@ -195,7 +201,12 @@ class Disks(abstract_device.AbstractDevice):
         mapping_info = {}
         for k, v in mapping_disk.items():
             if k in mapping_df.keys():
-                mapping_info[k] = mapping_disk[k] + mapping_df[k]
+                if mapping_disk[k][1] != 0:
+                # Find the Main dev whose minor number is zero
+                    diskstat_value = self.find_diskstat_value(mapping_disk, mapping_disk[k][0], 0)
+                else:
+                    diskstat_value = mapping_disk[k]
+                mapping_info[k] = diskstat_value + mapping_df[k]
         LOG.debug(_("mapping_info: %s\n"), mapping_info)
         return mapping_info
 
@@ -208,7 +219,8 @@ class Disks(abstract_device.AbstractDevice):
             disk['readTput'] = v[5] 
             disk['writeTput'] =  v[9]
             disk['iops'] = v[3] + v[7]
-            disk['latency'] = v[12]
+            # TODO(belin)right now just like iostat's await
+            disk['latency'] = v[6] + v[10]
             disk['total'] = v[16]
             disk['usage'] = v[19]
             self.disks.append(disk)
