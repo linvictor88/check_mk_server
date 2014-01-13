@@ -657,6 +657,7 @@ def do_all_checks_on_host(hostname, ipaddress, only_check_types = None):
     error_sections = set([])
     check_table = get_sorted_check_table(hostname)
     problems = []
+    device = None
 
     for checkname, item, params, description, info in check_table:
         if only_check_types != None and checkname not in only_check_types:
@@ -706,7 +707,6 @@ def do_all_checks_on_host(hostname, ipaddress, only_check_types = None):
                 results = check_function(item, params, info)
                 if len(results) != 2:
                     result = results
-                    device = None
                 else:
                     result, device = results
             except MKCounterWrapped, e:
@@ -735,6 +735,8 @@ def do_all_checks_on_host(hostname, ipaddress, only_check_types = None):
                                 traceback.format_exc().replace('\n', '\n      '),
                                 pprint.pformat(info)))
                     except:
+                        l = file(debug_log, "a")
+                        l.write("Failed to trace the error!")
                         pass
 
                 if opt_debug:
@@ -743,7 +745,7 @@ def do_all_checks_on_host(hostname, ipaddress, only_check_types = None):
                 if debug_log:
                     l = file(debug_log, "a")
                     l.write("Device Debug: hostname: %s\n" % hostname)
-                    l.write("Device Debug: device data: %s\n" % device.get_device_dict())
+                    l.write("Device Debug: device data (%s): %s\n" % (device.name, device.get_device_dict()))
                 device.write_device_file(hostname)
             if not dont_submit:
                 submit_check_result(hostname, description, result, aggrname)
@@ -1073,7 +1075,7 @@ livestatus_unix_socket = '/var/lib/nagios3/rw/live'
 # Checks for host3
 
 def get_sorted_check_table(hostname):
-    return [('cpu', None, None, 'CPU load', ''), ('memory', None, (150.0, 200.0), 'Memory used', '')]
+    return [('cpu', None, None, 'CPU load', ''), ('disks', 'SUMMARY', {}, 'Disks SUMMARY', ''), ('memory', None, (150.0, 200.0), 'Memory used', ''), ('nets', None, {'errors': (0.01, 0.1)}, 'Nets', ''), ('system', None, None, 'System', '')]
 
 precompiled_service_timeperiods = {}
 def check_period_of(hostname, service):
@@ -1088,6 +1090,478 @@ check_config_variables = []
 check_default_levels = {}
 snmp_info = {}
 snmp_scan_functions = {}
+# /home/nagios/check_mk/checks/system
+
+def inventory_system(info):
+    return [ (None, None) ]
+
+def check_system(_no_item, _no_params, info):
+    if not info:
+        return (3, "UNKNOW - no output from plugin")
+    system = devices.System(info)
+    uptime = system.uptime
+    seconds = uptime % 60
+    rem = uptime / 60
+    minutes = rem % 60
+    hours = (rem % 1440) / 60
+    days = rem / 1440
+    now = int(time.time())
+    since = time.strftime("%c", time.localtime(now - uptime))
+    return ((0, "OK - up since %s (%dd %02d:%02d:%02d)" % (since, days, hours, minutes, seconds), [ ("uptime", uptime) ]), system)
+
+
+check_info["system"] = (check_system, "System", 1, inventory_system)
+checkgroup_of["system"] = "system"
+
+
+# /home/nagios/check_mk/checks/disks
+
+
+
+
+
+check_includes['diskstat'] = [ "diskstat.include" ]
+
+
+def diskstat_parse_info(info):
+    info_plain = []
+    nameinfo = {}
+    phase = 'info'
+    for line in info:
+        if line[0] == '[dmsetup_info]':
+            phase = 'dmsetup_info'
+        elif line[0] == '[vx_dsk]':
+            phase = 'vx_dsk'
+        else:
+            if phase == 'info':
+                info_plain.append(line)
+            elif phase == 'dmsetup_info':
+                try:
+                    majmin = tuple(map(int, line[1].split(':')))
+                    if len(line) == 4:
+                        name = "LVM %s" % line[0]
+                    else:
+                        name = "DM %s" % line[0]
+                    nameinfo[majmin] = name
+                except:
+                    pass # ignore such crap as "No Devices Found"
+            elif phase == 'vx_dsk':
+                maj = int(line[0], 16)
+                min = int(line[1], 16)
+                group, disk = line[2].split('/')[-2:]
+                name = "VxVM %s-%s" % (group, disk)
+                nameinfo[(maj, min)] = name
+
+    return info_plain, nameinfo
+
+def diskstat_rewrite_device(nameinfo, linestart):
+    major, minor = map(int, linestart[:2])
+    device = linestart[2]
+    return nameinfo.get((major, minor), device)
+
+def linux_diskstat_convert(info):
+    info, nameinfo = diskstat_parse_info(info)
+    rewritten = [
+        ( diskstat_rewrite_device(nameinfo, l[0:3]),
+        int(l[5]),
+        int(l[9]),
+        int(l[3]),
+        int(l[7]),
+        int(l[12])
+        ) for l in info[1:] if len(l) >= 13
+    ]
+
+    return [ line for line in rewritten if not line[0].startswith("dm-") ]
+
+def inventory_disk(info):
+    return [( "SUMMARY", "diskstat_default_levels" )]
+
+def check_disks(item, params, info):
+    if not info:
+        return (3, "UNKNOW - no output from plugin")
+    this_time = int(time.time())
+    disks = devices.Disks(info)
+    average_range = params.get("average")
+    perfdata = []
+    infos = []
+    status = 0
+    disks_get = disks.get_device_dict()['disks']
+    for disk in disks_get:
+        for what, ctr in [ ("read-" + disk['name'],  disk['readTput']), ("write-" + disk['name'], disk['writeTput']) ]:
+            countername = "disk.%s.%s" % (item, what)
+
+            levels = params.get(what)
+            if levels:
+                warn, crit = levels
+            else:
+                warn, crit = None, None
+
+            timedif, sectors_per_sec = get_counter(countername, this_time, int(ctr))
+            bytes_per_sec = sectors_per_sec * 512
+            if what == ("read-" + disk['name']):
+                disk['readTput'] = bytes_per_sec
+            else:
+                disk['writeTput'] = bytes_per_sec
+            infos.append("%s/sec %s" % (get_bytes_human_readable(bytes_per_sec), what))
+            perfdata.append( (what, bytes_per_sec, warn, crit) )
+
+            if average_range != None:
+                timedif, avg = get_average(countername + ".avg", this_time, bytes_per_sec, average_range)
+                perfdata.append( (what + ".avg", avg) )
+                bytes_per_sec = avg
+
+            if levels != None:
+                mb_per_sec = bytes_per_sec / 1048576
+                if mb_per_sec >= crit:
+                    status = 2
+                    infos[-1] += "(!!)"
+                elif mb_per_sec >= warn:
+                    status = max(status, 1)
+                    infos[-1] += "(!)"
+
+        if average_range != None:
+            perfdata = [ perfdata[0], perfdata[2], perfdata[1], perfdata[3] ]
+
+        countername = "disk.%s" % item
+        ios_per_sec = None
+        timedif, ios_per_sec = get_counter(countername + ".ios-" + disk['name'], this_time, disk['iops'])
+        disk['iops'] = ios_per_sec
+        infos.append("IOs-%s: %.2f/sec" % (disk['name'], ios_per_sec))
+
+        perfdata.append(("ios-" + disk['name'], ios_per_sec))
+
+        timedif, timems_per_sec = get_counter(countername + ".time-" + disk['name'], this_time, disk['latency'])
+        if not ios_per_sec:
+            latency = 0.0
+            disk['latency'] = 0.0
+        else:
+            latency = timems_per_sec / ios_per_sec
+            disk['latency']  = latency
+        infos.append("Latency-%s: %.2fms" % (disk['name'], latency))
+        if "latency" in params:
+            warn, crit = params["latency"]
+            if latency >= crit:
+                status = 2
+                infos[-1] += "(!!)"
+            elif latency >= warn:
+                status = max(status, 1)
+                infos[-1] += "(!)"
+        else:
+            warn, crit = None, None
+
+        perfdata.append(("latency-" + disk['name'], latency))
+    disks.update_device(disks=disks_get)
+
+    return ((status, nagios_state_names[status] + " - " + ", ".join(infos) , perfdata), disks)
+
+check_info['disks'] = (check_disks, "Disks %s", 1,  inventory_disk)
+checkgroup_of["disks"] = "disks"
+
+
+
+# /home/nagios/check_mk/checks/nets
+
+
+
+check_includes['lnx_if'] = [ "if.include" ]
+
+linux_nic_check = "lnx_if"
+
+def if_lnx_convert_to_if64(info):
+    nic_info = {}
+    current_nic = None
+    index = 0
+    for line in info:
+        if line[0].startswith('['):
+            current_nic = line[0][1:-1]
+            index += 1
+            nic_info[current_nic]['index'] = index
+        elif current_nic == None: # still in perf-counters subsection
+            nic = line[0]
+            nic_info[nic] = { "counters": map(int, line[1].split()) }
+        else:
+            nic_info[current_nic][line[0].strip()] = line[1].strip()
+
+
+    if_table = []
+    index = 0
+    for nic, attr in nic_info.items():
+        counters = attr.get("counters", [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        index += 1
+        ifIndex = attr.get("index",index)
+        ifDescr = nic
+        ifAlias = nic
+
+        if nic == "lo":
+            ifType = 24
+        else:
+            ifType = 6
+
+        speed_text = attr.get("Speed")
+        if speed_text == None:
+            ifSpeed = ''
+        else:
+            if speed_text == '65535Mb/s': # unknown
+                ifSpeed = ''
+            elif speed_text.endswith("Kb/s"):
+                ifSpeed = int(speed_text[:-4]) * 1000
+            elif speed_text.endswith("Mb/s"):
+                ifSpeed = int(speed_text[:-4]) * 1000000
+            elif speed_text.endswith("Gb/s"):
+                ifSpeed = int(speed_text[:-4]) * 1000000000
+            else:
+                ifSpeed = ''
+
+        ifInOctets = counters[0]
+        inucast = counters[1] + counters[7]
+        inmcast = counters[7]
+        inbcast = 0
+        ifInDiscards = counters[3]
+        ifInErrors = counters[2]
+        ifOutOctets = counters[8]
+        outucast = counters[9]
+        outmcast = 0
+        outbcast = 0
+        ifOutDiscards = counters[11]
+        ifOutErrors = counters[10]
+        ifOutQLen = counters[12]
+
+        ld = attr.get("Link detected")
+        if ld == "yes":
+            ifOperStatus = 1
+        elif ld == "no":
+            ifOperStatus = 2
+        else:
+            if ifInOctets > 0:
+                ifOperStatus = 1 # assume up
+            else:
+                ifOperStatus = 4 # unknown (NIC has never been used)
+
+        ifPhysAddress = ''
+
+        if_table.append(map(str, [
+          ifIndex, ifDescr, ifType, ifSpeed, ifOperStatus,
+          ifInOctets, inucast, inmcast, inbcast, ifInDiscards,
+          ifInErrors, ifOutOctets, outucast, outmcast, outbcast,
+          ifOutDiscards, ifOutErrors, ifOutQLen, ifAlias, ifPhysAddress ]))
+
+    return if_table
+
+def inventory_nets(info):
+    return [(None, None)]
+
+def check_nets(item, params, info):
+    if not info:
+        return (3, "UNKNOW - no output from plugin")
+    this_time = int(time.time())
+    nets = devices.Nets(info)
+    perfdata = []
+    status = 0
+    infos = []
+    nets_get = nets.get_device_dict()['nets']
+    for net in nets_get:
+        infos.append("%s:" % (net['name']))
+        perfdata.append( ('name', net['name']) )
+        for name, counter in [
+            ( "inOctets", net['inOctets']),
+            ( "outOctets",   net['outOctets']),
+            ( "tput",   net['tput'])]:
+            timedif, valdiff_per_sec = get_counter("nets.%s.%s" % (name, net['name']), this_time, counter)
+            net[name] = valdiff_per_sec
+            infos.append("%s/sec %s" % (get_bytes_human_readable(valdiff_per_sec), name))
+            perfdata.append( (name, valdiff_per_sec) )
+
+        for name, counter in [
+            ( "pktRate", net['pktRate']),
+            ( "intfErrs",    net['intfErrs']) ]:
+            timedif, valdiff_per_sec = get_counter("nets.%s.%s" % (name, net['name']), this_time, counter)
+            net[name] = valdiff_per_sec
+            infos.append("%s/sec %s" % (valdiff_per_sec, name))
+            perfdata.append( (name, valdiff_per_sec) )
+        infos.append(";;;")
+
+    nets.update_device(nets=nets_get)
+
+    return ((status, nagios_state_names[status] + " - " + ", ".join(infos) , perfdata), nets)
+
+def check_if_common_single(item, params, info, force_counter_wrap = False):
+    targetspeed        = params.get("speed")
+    targetstate        = params.get("state")
+    average            = params.get("average")
+    unit               = params.get("unit") in ["Bit", "bit"] and "Bit" or "B"
+    unit_multiplier    = unit == "Bit" and 8.0 or 1.0
+
+    if params["errors"]:
+        err_warn, err_crit = params["errors"]
+    else:
+        err_warn, err_crit = None, None
+
+    if "traffic" in params:
+        bw_warn, bw_crit = params["traffic"]
+    else:
+        bw_warn, bw_crit = None, None
+
+
+    for ifIndex, ifDescr, ifType, ifSpeed, ifOperStatus, ifInOctets,  \
+            inucast, inmcast, inbcast, ifInDiscards, ifInErrors, ifOutOctets, \
+            outucast, outmcast, outbcast, ifOutDiscards, ifOutErrors, \
+            ifOutQLen, ifAlias, ifPhysAddress in info:
+        ifDescr = cleanup_if_strings(ifDescr)
+        ifAlias = cleanup_if_strings(ifAlias)
+
+        if item.lstrip("0") == ifIndex \
+            or (item == "0" * len(item) and saveint(ifIndex) == 0) \
+            or item == ifAlias \
+            or item == ifDescr \
+            or item == "%s %s" % (ifAlias, ifIndex) \
+            or item == "%s %s" % (ifDescr, ifIndex):
+
+            if item.lstrip("0") == ifIndex \
+                and (item == ifAlias or ifAlias == '') \
+                and (item == ifDescr or ifDescr == ''): # description trivial
+                infotext = ""
+            elif item == "%s %s" % (ifAlias, ifIndex) and ifDescr != '': # non-unique Alias
+                infotext = "[%s/%s]" % (ifAlias, ifDescr)
+            elif item != ifAlias and ifAlias != '': # alias useful
+                infotext = "[%s] " % ifAlias
+            elif item != ifDescr and ifDescr != '': # description useful
+                infotext = "[%s] " % ifDescr
+            else:
+                infotext = "[%s] " % ifIndex
+
+            state = 0
+
+            operstatus = if_statename(str(ifOperStatus))
+            if targetstate and  \
+                (ifOperStatus != targetstate
+                and not (type(targetstate) in [ list, tuple ] and ifOperStatus in targetstate)):
+                state = 2
+                infotext += "(%s)(!!) " % operstatus
+            else:
+                infotext += "(%s) " % operstatus
+
+
+            speed = saveint(ifSpeed)
+
+            if speed:
+                ref_speed = speed / 8.0
+            elif targetspeed:
+                ref_speed = targetspeed / 8.0
+            else:
+                ref_speed = None
+
+	    if ifPhysAddress:
+                mac = ":".join(["%02s" % hex(ord(m))[2:] for m in ifPhysAddress]).replace(' ', '0')
+                infotext += 'MAC: %s, ' % mac
+
+            if speed:
+                infotext += get_nic_speed_human_readable(speed)
+                if not targetspeed is None and speed != targetspeed:
+                    infotext += " (wrong speed, expected: %s)(!)" % get_nic_speed_human_readable(targetspeed)
+                    state = max(state, 1)
+            elif targetspeed:
+                infotext += "assuming %s" % get_nic_speed_human_readable(targetspeed)
+            else:
+                infotext += "speed unknown"
+
+            if ref_speed:
+                if bw_warn != None and type(bw_warn) == float:
+                    bw_warn = bw_warn / 100.0 * ref_speed * unit_multiplier
+                if bw_crit != None and type(bw_crit) == float:
+                    bw_crit = bw_crit / 100.0 * ref_speed * unit_multiplier
+
+            else:
+                if bw_warn != None and type(bw_warn) == float:
+                    bw_warn = None
+
+                if bw_crit != None and type(bw_crit) == float:
+                    bw_crit = None
+
+            if unit == "Bit":
+                if bw_crit and bw_crit != None:
+                    bw_crit = bw_crit / 8
+                if bw_warn and bw_warn != None:
+                    bw_warn = bw_warn / 8
+
+            this_time = time.time()
+            rates = []
+            wrapped = False
+            perfdata = []
+            for name, counter, warn, crit, mmin, mmax in [
+                ( "in",        ifInOctets, bw_warn, bw_crit, 0, ref_speed),
+                ( "inucast",   inucast, None, None, None, None),
+                ( "innucast",  saveint(inmcast) + saveint(inbcast), None, None, None, None),
+                ( "indisc",    ifInDiscards, None, None, None, None),
+                ( "inerr",     ifInErrors, err_warn, err_crit, None, None),
+
+                ( "out",       ifOutOctets, bw_warn, bw_crit, 0, ref_speed),
+                ( "outucast",  outucast, None, None, None, None),
+                ( "outnucast", saveint(outmcast) + saveint(outbcast), None, None, None, None),
+                ( "outdisc",   ifOutDiscards, None, None, None, None),
+                ( "outerr",    ifOutErrors, err_warn, err_crit, None, None) ]:
+
+                try:
+                    timedif, rate = get_counter("if.%s.%s" % (name, item), this_time, saveint(counter))
+                    if force_counter_wrap:
+                        raise MKCounterWrapped("if.%s.%s" % (name, item), "Forced counter wrap")
+                    rates.append(rate)
+                    perfdata.append( (name, rate, warn, crit, mmin, mmax) )
+                except MKCounterWrapped:
+                    wrapped = True
+
+            if wrapped:
+                if bw_crit != None:
+                    raise MKCounterWrapped("", "Counter wrap, skipping checks this time")
+                perfdata = []
+            else:
+                perfdata.append(("outqlen", saveint(ifOutQLen),"","", unit == "Bit" and "0.0" or "0"))
+                get_human_readable = lambda traffic: get_bytes_human_readable(traffic * unit_multiplier, 1024, True, unit)
+                for what, errorrate, okrate, traffic in \
+                   [ ("in",  rates[4], rates[1] + rates[2], rates[0]),
+                     ("out", rates[9], rates[6] + rates[7], rates[5]) ]:
+
+                    infotext += ", %s: %s/s" % (what, get_human_readable(traffic))
+
+                    if ref_speed:
+                        perc_used = 100.0 * traffic / ref_speed
+                        infotext += "(%.1f%%)" % perc_used
+
+                    if average:
+                        timedif, traffic_avg = get_average("if.%s.%s.avg" % (what, item), this_time, traffic, average)
+                        infotext += ", %dmin avg: %s/s" % (average, get_human_readable(traffic_avg))
+                        perfdata.append( ("%s_avg_%d" % (what, average), traffic_avg, bw_warn, bw_crit, 0, ref_speed) )
+                        traffic = traffic_avg # apply levels to average traffic
+
+                    if bw_crit != None and traffic >= bw_crit:
+                        state = 2
+                        infotext += ' (!!) >= ' + get_human_readable(bw_crit / unit_multiplier) + "/s"
+                    elif bw_warn != None and traffic >= bw_warn:
+                        state = max(state, 1)
+                        infotext += ' (!) >= ' + get_human_readable(bw_warn / unit_multiplier) + "/s"
+
+                    pacrate = okrate + errorrate
+                    if pacrate > 0.0: # any packets transmitted?
+                        errperc = 100.0 * errorrate / (okrate + errorrate)
+
+                        if errperc > 0:
+                            infotext += ", %s-errors: %.2f%%" % (what, errperc)
+
+                        if   err_crit != None and errperc >= err_crit:
+                            state = 2
+                            infotext += "(!!) >= " + str(err_crit)
+                        elif err_warn != None and errperc >= err_warn:
+                            state = max(state, 1)
+                            infotext += "(!) >= " + str(err_warn)
+
+            return (state, "%s - %s" % (nagios_state_names[state], infotext), perfdata)
+
+    return (3, "UNKNOWN - no such interface")
+
+check_info['nets'] = (check_nets, "Nets", 1,  inventory_nets)
+checkgroup_of['nets'] = "nets"
+check_default_levels['nets'] = "if_default_levels"
+
+
 # /home/nagios/check_mk/checks/cpu
 
 
@@ -1129,24 +1603,37 @@ def inventory_cpu_threads(info):
         return [(None, "", "threads_default_levels")]
 
 def check_cpu(item, params, info):
+    if not info:
+        return (3, "UNKNOW - no output from plugin")
     global g_counters
     cpu = devices.Cpu(info)
     this_time = int(time.time())
-    diff_values = []
+    diff_values = {}
     n = 0
     for k, v in cpu.get_device_dict().items():
-        n += 1
-        countername = "cpu.util.%d" % n
+        if v is None:
+            continue
+        countername = "cpu.util.%s" % k
         last_time, last_val = g_counters.get(countername, (0, 0))
-        diff_values.append(v - last_val)
+        diff_values[k] = (v - last_val)
         g_counters[countername] = (this_time, v)
 
-    sum_jiffies = sum(diff_values[0:7]) # do not account for steal!
+    sum_jiffies = diff_values['total'] # do not account for steal!
     if sum_jiffies == 0:
         return (0, "OK - too short interval")
-    user        = diff_values[0] + diff_values[1] # add user + nice
-    system      = diff_values[2]
-    wait        = diff_values[4]
+
+    usage = 100 * float(sum_jiffies - diff_values['idle']) / float(sum_jiffies)
+
+    cpu.update_device(user=diff_values['user'], nice=diff_values['nice'],
+                      system=diff_values['system'], idle=diff_values['idle'],
+                      iowait=diff_values['iowait'], irq=diff_values['irq'],
+                      softirq=diff_values['softirq'], steal=diff_values['steal'],
+                      total=sum_jiffies,
+                      usage=usage)
+
+    user        = diff_values['user'] + diff_values['nice'] # add user + nice
+    system      = diff_values['system']
+    wait        = diff_values['iowait']
     user_perc   = 100.0 * float(user)   / float(sum_jiffies)
     system_perc = 100.0 * float(system) / float(sum_jiffies)
     wait_perc   = 100.0 * float(wait)   / float(sum_jiffies)
@@ -1220,6 +1707,8 @@ memused_default_levels = (150.0, 200.0)
 mem_extended_perfdata = False
 
 def check_memory(params, mem_dict):
+    if not mem_dict:
+        return (3, "UNKNOWN - no output from plugin ")
     memory = devices.Memory(mem_dict)
     meminfo = memory.get_device_dict()
     try:

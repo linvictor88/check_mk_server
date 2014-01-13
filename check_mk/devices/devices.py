@@ -10,6 +10,12 @@ from check_mk.devices import abstract_device
 
 LOG = logging.getLogger(__name__)
 
+CPU_SPEED = "cpu MHz"
+CPU_TOP = "Cpu(s)"
+
+STATE_RUNNING = 'running'
+STATE_DOWN = 'down'
+
 
 class Memory(abstract_device.AbstractDevice):
     """Memory device data collector.
@@ -36,7 +42,8 @@ class Memory(abstract_device.AbstractDevice):
         self.caches = meminfo['Cached']
         self.buffers = meminfo['Buffers']
         self.active = meminfo['Active']
-        self.usage = float(self.used - self.caches - self.buffers) / float(self.total) * 100
+        self.usage = (float(self.used - self.caches - self.buffers)
+                      / float(self.total) * 100)
 
     def parse_proc_meminfo(self, plain_info):
         return dict([(i[0][:-1], int(i[1])) for i in plain_info])
@@ -63,8 +70,9 @@ class Memory(abstract_device.AbstractDevice):
 
 class Cpu(abstract_device.AbstractDevice):
     """Cpu device data collector.
-    data is in units of USER_HZ (1/100ths of a seconds
-    on most architectures"""
+    speed is in units of MHz and other data is in units
+    of USER_HZ (1/100ths of a seconds on most architectures
+    """
 
     name = 'cpu'
     def get_plain_info(self):
@@ -76,10 +84,22 @@ class Cpu(abstract_device.AbstractDevice):
         plain_info = [line.split(' ', 1) 
                       for line in utils.execute(cmd).split('\n')
                       if line and line.find('cpu') != -1]
+
+        speed_cmd = ['cat', '/proc/cpuinfo']
+        speed_info = [line.split(':')
+                      for line in utils.execute(speed_cmd).split('\n')
+                      if line and line.find(CPU_SPEED) != -1]
+        plain_info.extend(speed_info)
+
+        top_cmd = ['top', '-d', '1', '-n', '1', '-b']
+        top_info = [line.split(':')
+                      for line in utils.execute(top_cmd).split('\n')
+                      if line and line.find(CPU_TOP) != -1]
+        plain_info.extend(top_info) 
         return plain_info
 
     def parse_plain_info(self, plain_info):
-        cpuinfo = self.parse_proc_meminfo(plain_info)
+        cpuinfo = dict([(i[0].strip(), i[1].strip()) for i in plain_info ])
         LOG.debug(_("cpu_info: %s"), cpuinfo)
         self.count = len(cpuinfo) - 1
         for key, value in cpuinfo.items():
@@ -99,9 +119,12 @@ class Cpu(abstract_device.AbstractDevice):
                 #TODO(berlin) how to calculate the usage
                 self.usage = None
                 self.userHz = os.sysconf(os.sysconf_names['SC_CLK_TCK'])
-
-    def parse_proc_meminfo(self, plain_info):
-        return dict([(i[0], i[1]) for i in plain_info ])
+            elif key == CPU_SPEED:
+                self.speed = float(value)
+            elif key == CPU_TOP:
+                v = [float(x.split('%')[0]) for x in value.split()]
+                self.workload = float(100) - v[3]
+                self.workload = "%.2f" % self.workload
 
     def get_device_dict(self):
             return {'user': self.user,
@@ -115,7 +138,9 @@ class Cpu(abstract_device.AbstractDevice):
                     'total': self.total,
                     'count': self.count,
                     'userHz': self.userHz,
-                    'usage': self.usage}
+                    'usage': self.usage,
+                    'speed': self.speed,
+                    'workload': self.workload}
 
     def init_device(self, device_dict):
         self.count = device_dict['count']
@@ -130,6 +155,8 @@ class Cpu(abstract_device.AbstractDevice):
         self.total = device_dict['total']
         self.userHz = device_dict['userHz']
         self.usage = device_dict['usage']
+        self.speed = device_dict['speed']
+        self.workload = device_dict['workload']
 
 
 class System(abstract_device.AbstractDevice):
@@ -146,12 +173,15 @@ class System(abstract_device.AbstractDevice):
 
     def parse_plain_info(self, plain_info):
         self.uptime = float(plain_info[0][0])
+        self.state = STATE_RUNNING
 
     def get_device_dict(self):
-            return {'uptime': self.uptime}
+        return {'uptime': self.uptime,
+                'state': self.state}
 
     def init_device(self, device_dict):
         self.uptime = device_dict['uptime']
+        self.state = device_dict['state']
 
 class Disks(abstract_device.AbstractDevice):
     """Disk device data collector.
@@ -219,10 +249,10 @@ class Disks(abstract_device.AbstractDevice):
             disk['readTput'] = v[5] 
             disk['writeTput'] =  v[9]
             disk['iops'] = v[3] + v[7]
-            # TODO(belin)right now just like iostat's await
+            # TODO(belin)right now latency is just like iostat's await
             disk['latency'] = v[6] + v[10]
-            disk['total'] = v[16]
-            disk['usage'] = v[19]
+            disk['total'] = int(v[16])
+            disk['usage'] = int(v[19][:-1])
             self.disks.append(disk)
         
     def get_device_dict(self):
@@ -288,6 +318,8 @@ class Nets(abstract_device.AbstractDevice):
             net['intfErrs'] = v[2] + v[10]
             net['intfState'] = v[16]
             net['tput'] = v[0] + v[8]
+            net['pktInRate'] = v[1]
+            net['pktOutRate'] = v[9]
             net['pktRate'] = v[1] + v[7] + v[9]
             #TODO(berlin): It seems that perf can test the bandwidth
             net['bandwidth'] = None
@@ -301,11 +333,11 @@ class Nets(abstract_device.AbstractDevice):
 
     def write_device_file(self, hostname):
         """Write device data into file."""
+        timestamp = int(time.time())
         for net in self.nets:
             device_dir = os.path.join(abstract_device.DATA_BASE_DIR, hostname, self.name, net['name'])
             if not os.path.isdir(device_dir):
                 os.makedirs(device_dir, 0o755)
-            timestamp = int(time.time())
             for k, v in net.items():
                 file_name = os.path.join(device_dir, k)
                 data = _("%(timestamp)d %(value)s\n" % {'timestamp': timestamp,

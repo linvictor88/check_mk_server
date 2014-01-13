@@ -1,1 +1,146 @@
-{"memory": {"used": 7789720, "swapTotal": 4190204, "swapFree": 4153332, "active": 4074740, "total": 8177236, "buffers": 432640, "caches": 3863820}}
+{
+    "system": {
+        "uptime": 2755202.67
+    }, 
+    "disks": {
+        "count": 2, 
+        "disks": [
+            {
+                "latency": 66337876, 
+                "readTput": 7122762, 
+                "name": "dm-0", 
+                "writeTput": 567158048, 
+                "iops": 23944956, 
+                "usage": "15%", 
+                "total": "283954808"
+            }, 
+            {
+                "latency": 1472, 
+                "readTput": 2484, 
+                "name": "sda1", 
+                "writeTput": 190, 
+                "iops": 385, 
+                "usage": "14%", 
+                "total": "233191"
+            }
+        ]
+    }, 
+    "nets": {
+        "nets": [
+            {
+                "pktRate": 174165592, 
+                "tput": 49534954310, 
+                "name": "lo", 
+                "intfErrs": 0, 
+                "intfState": 1, 
+                "outOctets": 24767477155, 
+                "inOctets": 24767477155, 
+                "bandwidth": null
+            }, 
+            {
+                "pktRate": 809, 
+                "tput": 84423, 
+                "name": "tap4ca1b40b-87", 
+                "intfErrs": 0, 
+                "intfState": 1, 
+                "outOctets": 83955, 
+                "inOctets": 468, 
+                "bandwidth": null
+            }, 
+            {
+                "pktRate": 0, 
+                "tput": 0, 
+                "name": "virbr0", 
+                "intfErrs": 0, 
+                "intfState": 0, 
+                "outOctets": 0, 
+                "inOctets": 0, 
+                "bandwidth": null
+            }, 
+            {
+                "pktRate": 120565028, 
+                "tput": 16016315478, 
+                "name": "br0", 
+                "intfErrs": 0, 
+                "intfState": 1, 
+                "outOctets": 3177035648, 
+                "inOctets": 12839279830, 
+                "bandwidth": null
+            }, 
+            {
+                "pktRate": 6, 
+                "tput": 468, 
+                "name": "br-int", 
+                "intfErrs": 0, 
+                "intfState": 1, 
+                "outOctets": 468, 
+                "inOctets": 0, 
+                "bandwidth": null
+            }, 
+            {
+                "pktRate": 0, 
+                "tput": 0, 
+                "name": "tap3fd3e0b6-3e", 
+                "intfErrs": 0, 
+                "intfState": 0, 
+                "outOctets": 0, 
+                "inOctets": 0, 
+                "bandwidth": null
+            }, 
+            {
+                "pktRate": 0, 
+                "tput": 0, 
+                "name": "ovs-system", 
+                "intfErrs": 0, 
+                "intfState": 0, 
+                "outOctets": 0, 
+                "inOctets": 0, 
+                "bandwidth": null
+            }, 
+            {
+                "pktRate": 147204989, 
+                "tput": 16600732429, 
+                "name": "eth1", 
+                "intfErrs": 0, 
+                "intfState": 1, 
+                "outOctets": 3281016535, 
+                "inOctets": 13319715894, 
+                "bandwidth": null
+            }, 
+            {
+                "pktRate": 0, 
+                "tput": 0, 
+                "name": "eth0", 
+                "intfErrs": 0, 
+                "intfState": 0, 
+                "outOctets": 0, 
+                "inOctets": 0, 
+                "bandwidth": null
+            }
+        ]
+    }, 
+    "cpu": {
+        "iowait": 5834186, 
+        "userHz": 100, 
+        "user": 8615062, 
+        "total": 2202472545, 
+        "count": 8, 
+        "softirq": 125072, 
+        "irq": 7, 
+        "system": 2112494, 
+        "idle": 2185687588, 
+        "usage": null, 
+        "steal": 0, 
+        "nice": 98136
+    }, 
+    "memory": {
+        "active": 3949632, 
+        "swapFree": 4139144, 
+        "used": 7591640, 
+        "usage": 42.56611891842182, 
+        "swapTotal": 4190204, 
+        "total": 8177236, 
+        "buffers": 430228, 
+        "caches": 3680680
+    }
+}

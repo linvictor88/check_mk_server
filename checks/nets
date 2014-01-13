@@ -165,6 +165,8 @@ def check_nets(item, params, info):
             perfdata.append( (name, valdiff_per_sec) )
 
         for name, counter in [
+            ("pktInRate", net['pktInRate']),
+            ("pktOutRate", net['pktOutRate']),
             ( "pktRate", net['pktRate']),
             ( "intfErrs",    net['intfErrs']) ]:
             timedif, valdiff_per_sec = get_counter("nets.%s.%s" % (name, net['name']), this_time, counter)

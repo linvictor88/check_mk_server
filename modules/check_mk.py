@@ -28,7 +28,6 @@
 # the variable check_mk_web is set to True
 
 import os, sys, socket, time, getopt, glob, re, stat, py_compile, urllib, inspect
-import pdb
 
 # These variable will be substituted at 'make dist' time
 check_mk_version  = '(inofficial)'
@@ -2581,7 +2580,6 @@ def get_precompiled_check_table(hostname):
     return precomp_table
 
 def precompile_hostchecks():
-    #pdb.set_trace()
     if not os.path.exists(precompiled_hostchecks_dir):
         os.makedirs(precompiled_hostchecks_dir)
     for host in all_active_hosts() + all_active_clusters():
@@ -2650,6 +2648,7 @@ CHECK_MK_LIB_MODULE = os.path.join(os.path.dirname(__file__),
                              '../..')
 sys.path.append(CHECK_MK_LIB_MODULE)
 from check_mk.devices import devices
+from check_mk.devices import vm
 """)
 
     # initialize global variables

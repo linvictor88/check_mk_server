@@ -23,8 +23,8 @@ class AbstractDevice(object):
         #TODO(berlin): Here exists problems that None device_dict collected,
         #Server must first check the output before initializing a device.
         if not device_dict:
-            self.plain_info = self.get_plain_info()
-            self.parse_plain_info(self.plain_info)
+            plain_info = self.get_plain_info()
+            self.parse_plain_info(plain_info)
         else:
             self.init_device(device_dict)
 

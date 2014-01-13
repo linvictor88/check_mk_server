@@ -846,6 +846,7 @@ def do_all_checks_on_host(hostname, ipaddress, only_check_types = None):
     check_table = get_sorted_check_table(hostname)
     problems = []
     device = None
+    device_list = []
 
     for checkname, item, params, description, info in check_table:
         if only_check_types != None and checkname not in only_check_types:
@@ -941,12 +942,19 @@ def do_all_checks_on_host(hostname, ipaddress, only_check_types = None):
                     l = file(debug_log, "a")
                     l.write("Device Debug: hostname: %s\n" % hostname)
                     l.write("Device Debug: device data (%s): %s\n" % (device.name, device.get_device_dict()))
-                device.write_device_file(hostname)
+                device_list.append(device)
+                #device.write_device_file(hostname)
             if not dont_submit:
                 submit_check_result(hostname, description, result, aggrname)
         else:
             error_sections.add(infotype)
-
+    if not device_list:
+        derived_data = vm.Vm(device_list, hostname)
+        if debug_log:
+            l = file(debug_log, "a")
+            l.write("Device Debug: derived data (%s): %s\n" % (hostname, vm.get_vm_dict()))
+        vm.write_vm_file()
+        
     submit_aggregated_results(hostname)
 
     try:
