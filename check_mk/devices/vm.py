@@ -74,6 +74,8 @@ class Vm(object):
         """Write Derived data into files."""
         timestamp = int(time.time())
         for device, data_dict in self.get_vm_dict().items():
+            if not isinstance(data_dict, dict):
+                continue
             device_dir = os.path.join(abstract_device.DATA_BASE_DIR, self.name, device)
             if not os.path.isdir(device_dir):
                 os.makedirs(device_dir, 0o755)

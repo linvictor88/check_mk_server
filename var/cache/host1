@@ -1,27 +1,28 @@
 {
     "system": {
-        "uptime": 5718844.82
+        "uptime": 5721995.32, 
+        "state": "running"
     }, 
     "disks": {
         "count": 2, 
         "disks": [
             {
-                "latency": 243968828, 
-                "readTput": 126910050, 
+                "latency": 243975864, 
+                "readTput": 126926690, 
                 "name": "dm-0", 
-                "writeTput": 1598951144, 
-                "iops": 65986732, 
-                "usage": "19%", 
-                "total": "15211520"
+                "writeTput": 1598957336, 
+                "iops": 65987477, 
+                "usage": 19, 
+                "total": 15211520
             }, 
             {
-                "latency": 184440336, 
-                "readTput": 138041726, 
+                "latency": 184445080, 
+                "readTput": 138058366, 
                 "name": "sda1", 
-                "writeTput": 1607537856, 
-                "iops": 46154855, 
-                "usage": "13%", 
-                "total": "233191"
+                "writeTput": 1607544048, 
+                "iops": 46155290, 
+                "usage": 13, 
+                "total": 233191
             }
         ]
     }, 
@@ -35,7 +36,9 @@
                 "intfState": 1, 
                 "outOctets": 109644523190, 
                 "inOctets": 109644523190, 
-                "bandwidth": null
+                "bandwidth": null, 
+                "pktInRate": 383035917, 
+                "pktOutRate": 383035917
             }, 
             {
                 "pktRate": 0, 
@@ -45,7 +48,9 @@
                 "intfState": 0, 
                 "outOctets": 0, 
                 "inOctets": 0, 
-                "bandwidth": null
+                "bandwidth": null, 
+                "pktInRate": 0, 
+                "pktOutRate": 0
             }, 
             {
                 "pktRate": 0, 
@@ -55,42 +60,48 @@
                 "intfState": 0, 
                 "outOctets": 0, 
                 "inOctets": 0, 
-                "bandwidth": null
+                "bandwidth": null, 
+                "pktInRate": 0, 
+                "pktOutRate": 0
             }, 
             {
-                "pktRate": 126377491, 
-                "tput": 11708887152, 
+                "pktRate": 126458872, 
+                "tput": 11716067348, 
                 "name": "eth0", 
                 "intfErrs": 0, 
                 "intfState": 1, 
-                "outOctets": 244877575, 
-                "inOctets": 11464009577, 
-                "bandwidth": null
+                "outOctets": 245073036, 
+                "inOctets": 11470994312, 
+                "bandwidth": null, 
+                "pktInRate": 125075161, 
+                "pktOutRate": 1188904
             }
         ]
     }, 
     "cpu": {
-        "iowait": 3481632, 
+        "iowait": 3481688, 
         "userHz": 100, 
-        "user": 66110872, 
-        "total": 569185621, 
-        "count": 1, 
-        "softirq": 440783, 
+        "user": 66111505, 
+        "total": 569499935, 
+        "speed": 2394.0, 
+        "count": 3, 
+        "workload": "14.80", 
+        "softirq": 440802, 
         "irq": 126, 
-        "system": 14341865, 
-        "idle": 484716916, 
+        "system": 14342121, 
+        "idle": 485030266, 
         "usage": null, 
         "steal": 0, 
         "nice": 93427
     }, 
     "memory": {
-        "active": 350236, 
+        "active": 354160, 
         "swapFree": 853720, 
-        "used": 773560, 
-        "usage": 28.517374426445706, 
+        "used": 782876, 
+        "usage": 28.525224613476418, 
         "swapTotal": 1044476, 
         "total": 1019084, 
-        "buffers": 160796, 
-        "caches": 322148
+        "buffers": 161008, 
+        "caches": 331172
     }
 }

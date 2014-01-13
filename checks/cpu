@@ -73,6 +73,10 @@ def check_cpu(item, params, info):
     diff_values = {}
     n = 0
     for k, v in cpu.get_device_dict().items():
+        if k not in ('user', 'nice', 'system', 'idle',
+                        'iowait', 'irq', 'softirq', 'steal', 'total'):
+            continue
+
         if v is None:
             continue
         countername = "cpu.util.%s" % k

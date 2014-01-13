@@ -948,12 +948,12 @@ def do_all_checks_on_host(hostname, ipaddress, only_check_types = None):
                 submit_check_result(hostname, description, result, aggrname)
         else:
             error_sections.add(infotype)
-    if not device_list:
+    if device_list:
         derived_data = vm.Vm(device_list, hostname)
         if debug_log:
             l = file(debug_log, "a")
-            l.write("Device Debug: derived data (%s): %s\n" % (hostname, vm.get_vm_dict()))
-        vm.write_vm_file()
+            l.write("Device Debug: derived data (%s): %s\n" % (hostname, derived_data.get_vm_dict()))
+        derived_data.write_vm_file()
         
     submit_aggregated_results(hostname)
 
