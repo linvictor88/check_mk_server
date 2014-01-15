@@ -202,27 +202,27 @@ def check_disks(item, params, info):
 
         perfdata.append(("ios-" + disk['name'], ios_per_sec))
 
-        # Do Latency computation if this information is available:
-        timedif, timems_per_sec = get_counter(countername + ".time-" + disk['name'], this_time, disk['latency'])
+        # Do ioLatency computation if this information is available:
+        timedif, timems_per_sec = get_counter(countername + ".time-" + disk['name'], this_time, disk['ioLatency'])
         if not ios_per_sec:
-            latency = 0.0
-            disk['latency'] = 0.0
+            ioLatency = 0.0
+            disk['ioLatency'] = 0.0
         else:
-            latency = timems_per_sec / ios_per_sec
-            disk['latency']  = latency
-        infos.append("Latency-%s: %.2fms" % (disk['name'], latency))
-        if "latency" in params:
-            warn, crit = params["latency"]
-            if latency >= crit:
+            ioLatency = timems_per_sec / ios_per_sec
+            disk['ioLatency']  = ioLatency
+        infos.append("ioLatency-%s: %.2fms" % (disk['name'], ioLatency))
+        if "ioLatency" in params:
+            warn, crit = params["ioLatency"]
+            if ioLatency >= crit:
                 status = 2
                 infos[-1] += "(!!)"
-            elif latency >= warn:
+            elif ioLatency >= warn:
                 status = max(status, 1)
                 infos[-1] += "(!)"
         else:
             warn, crit = None, None
 
-        perfdata.append(("latency-" + disk['name'], latency))
+        perfdata.append(("ioLatency-" + disk['name'], ioLatency))
     disks.update_device(disks=disks_get)
 
     return ((status, nagios_state_names[status] + " - " + ", ".join(infos) , perfdata), disks)

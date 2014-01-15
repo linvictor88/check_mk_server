@@ -91,11 +91,11 @@ class Cpu(abstract_device.AbstractDevice):
                       if line and line.find(CPU_SPEED) != -1]
         plain_info.extend(speed_info)
 
-        top_cmd = ['top', '-d', '1', '-n', '1', '-b']
-        top_info = [line.split(':')
-                      for line in utils.execute(top_cmd).split('\n')
-                      if line and line.find(CPU_TOP) != -1]
-        plain_info.extend(top_info) 
+        #top_cmd = ['top', '-d', '1', '-n', '1', '-b']
+        #top_info = [line.split(':')
+        #              for line in utils.execute(top_cmd).split('\n')
+        #              if line and line.find(CPU_TOP) != -1]
+        #plain_info.extend(top_info) 
         return plain_info
 
     def parse_plain_info(self, plain_info):
@@ -121,10 +121,10 @@ class Cpu(abstract_device.AbstractDevice):
                 self.userHz = os.sysconf(os.sysconf_names['SC_CLK_TCK'])
             elif key == CPU_SPEED:
                 self.speed = float(value)
-            elif key == CPU_TOP:
-                v = [float(x.split('%')[0]) for x in value.split()]
-                self.workload = float(100) - v[3]
-                self.workload = "%.2f" % self.workload
+            #elif key == CPU_TOP:
+            #    v = [float(x.split('%')[0]) for x in value.split()]
+            #    self.workload = float(100) - v[3]
+            #    self.workload = "%.2f" % self.workload
 
     def get_device_dict(self):
             return {'user': self.user,
@@ -139,8 +139,7 @@ class Cpu(abstract_device.AbstractDevice):
                     'count': self.count,
                     'userHz': self.userHz,
                     'usage': self.usage,
-                    'speed': self.speed,
-                    'workload': self.workload}
+                    'speed': self.speed}
 
     def init_device(self, device_dict):
         self.count = device_dict['count']
@@ -156,7 +155,6 @@ class Cpu(abstract_device.AbstractDevice):
         self.userHz = device_dict['userHz']
         self.usage = device_dict['usage']
         self.speed = device_dict['speed']
-        self.workload = device_dict['workload']
 
 
 class System(abstract_device.AbstractDevice):
@@ -188,7 +186,7 @@ class Disks(abstract_device.AbstractDevice):
 
     readTput, writeTput are in units of bytes/sec,
     latency is in units of milliseconds,
-    total is in units of KB"""
+    total is in units of MB"""
 
     name = 'disks'
     def find_diskstat_value(self, mapping_disk, major, minor):
@@ -201,7 +199,7 @@ class Disks(abstract_device.AbstractDevice):
         """Get plain info of system."""
         # Get df info
         excludefs="-x smbfs -x tmpfs -x devtmpfs -x cifs -x iso9660 -x udf -x nfsv4 -x nfs -x mvfs -x zfs"
-        df_cmd = ['df', '-PTlk'] + excludefs.split()
+        df_cmd = ['df', '-PTlm'] + excludefs.split()
         df_info = [line.split() 
                    for line in utils.execute(df_cmd).split('\n')
                    if line]
@@ -248,10 +246,17 @@ class Disks(abstract_device.AbstractDevice):
             disk = {'name': name}
             disk['readTput'] = v[5] 
             disk['writeTput'] =  v[9]
+            disk['readIos'] = v[3]
+            disk['writeIos'] = v[7]
             disk['iops'] = v[3] + v[7]
             # TODO(belin)right now latency is just like iostat's await
-            disk['latency'] = v[6] + v[10]
-            disk['total'] = int(v[16])
+            disk['readLatency'] = v[6]
+            disk['writeLatency'] = v[10]
+            disk['ioLatency'] = v[6] + v[10]
+            # the total ticks doing IO operations,if 100% of util would lead
+            # to device saturation
+            disk['ioTotalTicks'] = v[12]
+            disk['capacity'] = int(v[16])
             disk['usage'] = int(v[19][:-1])
             self.disks.append(disk)
         
