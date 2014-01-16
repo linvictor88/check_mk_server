@@ -244,18 +244,21 @@ class Disks(abstract_device.AbstractDevice):
         self.disks = []
         for name, v in plain_info.items():
             disk = {'name': name}
+            # bytes per sec
             disk['readTput'] = v[5] 
             disk['writeTput'] =  v[9]
+            # number per sec
             disk['readIos'] = v[3]
             disk['writeIos'] = v[7]
             disk['iops'] = v[3] + v[7]
             # TODO(belin)right now latency is just like iostat's await
+            # IO latency per sec
             disk['readLatency'] = v[6]
             disk['writeLatency'] = v[10]
             disk['ioLatency'] = v[6] + v[10]
             # the total ticks doing IO operations,if 100% of util would lead
             # to device saturation
-            disk['ioTotalTicks'] = v[12]
+            #disk['ioTotalTicks'] = v[12]
             disk['capacity'] = int(v[16])
             disk['usage'] = int(v[19][:-1])
             self.disks.append(disk)

@@ -14,9 +14,7 @@ LOG = logging.getLogger(__name__)
 
 TenMbKBPerSec = float(10 * 1024 / 8)
 TenMbPktsPerSec = float(500000)
-# check_mk: fixed 300s interval
-#TODO(berlin): the interval should be flexible
-TimeInterval = 300.0
+
 
 class Vm(object):
     name = 'vm'
@@ -81,26 +79,46 @@ class Vm(object):
                 disk['oio'] = disk['commandsAverage'] * disk['ioLatency']
                 maxObservedOIO = "%s-disk-%s-maxObservedOIO" % (self.name, disk['name'])
                 disk['maxObservedOIO'] = counter.get_counter(maxObservedOIO)
-                disk['maxObservedOIO'] = max(disk['maxObservedOIO'], disk['oio'])
+                disk['maxObservedOIO'] = max(disk['maxObservedOIO'], disk['oio'], 32)
                 counter.update_counter(maxObservedOIO, disk['maxObservedOIO'])
                 disk['demand'] = disk['oio'] / disk['maxObservedOIO'] * 100.0
                 self.disks['capacity'] += item['capacity']
                 self.disks['freespace'] += item['capacity'] * (100.0 - item['usage']) / 100.0
+
+                # IO number per sec
                 self.disks['readTotalIos'] += item['readIos']
                 self.disks['writeTotalIos'] += item['writeIos']
+                # IO latency per sec
                 self.disks['readTotalLatency'] += item['readLatency']
                 self.disks['writeTotalLatency'] += item['writeLatency']
+
+                # kB per sec
                 self.disks['readAverage'] += item['readTput'] / 1024.0
                 self.disks['writeAverage'] += item['writeTput'] / 1024.0
-                self.disks['usageAverage'] = 0.0
+                self.disks['usageAverage'] = self.disks['readAverage'] + self.disks['writeAverage']
+
                 self.disks['workload'] = max(self.disks['workload'], disk['demand'])
                 self.disks['disks'].append(disk)
             self.disks['totalIos'] =  self.disks['readTotalIos'] + self.disks['writeTotalIos']
             self.disks['totalLatency'] = self.disks['readTotalLatency'] + self.disks['writeTotalLatency']
-            self.disks['totalIoLatency'] = self.disks['totalLatency'] / self.disks['totalIos'] * TimeInterval
-            self.disks['readIoLatency'] = self.disks['readTotalIos'] / self.disks['readTotalLatency'] * TimeInterval
-            self.disks['writeIoLatency'] = self.disks['writeTotalLatency'] /self.disks['writeTotalIos'] * TimeInterval
+
+            if not self.disks['totalIos']:
+                self.disks['totalIoLatency'] = 0.0
+            else:
+                self.disks['totalIoLatency'] = self.disks['totalLatency'] / self.disks['totalIos']
+
+            if not self.disks['readTotalIos']:
+                self.disks['readIoLatency'] = 0.0
+            else:
+                self.disks['readIoLatency'] = self.disks['readTotalLatency'] / self.disks['readTotalIos']
+
+            if not self.disks['writeTotalIos']:
+                self.disks['writeIoLatency'] = 0.0
+            else:
+                self.disks['writeIoLatency'] = self.disks['writeTotalLatency'] /self.disks['writeTotalIos']
+
             self.disks['usageAverage'] = self.disks['readAverage'] + self.disks['writeAverage']
+
         if 'nets' in device_mapping:
             nets = device_mapping['nets'].get_device_dict()
             self.nets = {}

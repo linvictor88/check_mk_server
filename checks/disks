@@ -151,78 +151,46 @@ def check_disks(item, params, info):
     perfdata = []
     infos = []
     status = 0
+    if debug_log:
+        l = file(debug_log, "a")
+        l.write("Device disk Debug: step %d\n" % 1)
     disks_get = disks.get_device_dict()['disks']
+    if debug_log:
+        l = file(debug_log, "a")
+        l.write("Device disk Debug: step 2 %s\n" % disks_get)
     for disk in disks_get:
-        for what, ctr in [ ("read-" + disk['name'],  disk['readTput']), ("write-" + disk['name'], disk['writeTput']) ]:
-            countername = "disk.%s.%s" % (item, what)
+        infos.append("%s:" % (disk['name']))
+        perfdata.append( ('name', disk['name']) )
+        for name, counter in [
+            ( "readTput", disk['readTput']),
+            ( "writeTput",   disk['writeTput'])]:
+            timedif, valdiff_per_sec = get_counter("disks.%s.%s" % (name, disk['name']), this_time, counter)
+            disk[name] = valdiff_per_sec
+            infos.append("%s/sec %s" % (get_bytes_human_readable(valdiff_per_sec), name))
+            perfdata.append( (name, valdiff_per_sec) )
 
-            # unpack levels now, need also for perfdata
-            levels = params.get(what)
-            if levels:
-                warn, crit = levels
-            else:
-                warn, crit = None, None
+        for name, counter in [
+            ("readIos", disk['readIos']),
+            ("writeIos", disk['writeIos']),
+            ("iops", disk['iops']),
+            ("readLatency", disk['readLatency']),
+            ("writeLatency", disk['writeLatency']),
+            ("ioLatency", disk['ioLatency'])]:
+            timedif, valdiff_per_sec = get_counter("disks.%s.%s" % (name, disk['name']), this_time, counter)
+            disk[name] = valdiff_per_sec
+            if name == 'ioLatency':
+                continue
+            infos.append("%s/sec %s" % (valdiff_per_sec, name))
+            perfdata.append( (name, valdiff_per_sec) )
 
-            # compute IO rate in bytes/sec
-            timedif, sectors_per_sec = get_counter(countername, this_time, int(ctr))
-            bytes_per_sec = sectors_per_sec * 512
-            if what == ("read-" + disk['name']):
-                disk['readTput'] = bytes_per_sec
-            else:
-                disk['writeTput'] = bytes_per_sec
-            infos.append("%s: %s/sec" % (what, get_bytes_human_readable(bytes_per_sec)))
-            perfdata.append( (what, bytes_per_sec, warn, crit) )
-
-            # compute average of the rate over ___ minutes
-            if average_range != None:
-                timedif, avg = get_average(countername + ".avg", this_time, bytes_per_sec, average_range)
-                perfdata.append( (what + ".avg", avg) )
-                bytes_per_sec = avg
-
-            # check levels
-            if levels != None:
-                mb_per_sec = bytes_per_sec / 1048576
-                if mb_per_sec >= crit:
-                    status = 2
-                    infos[-1] += "(!!)"
-                elif mb_per_sec >= warn:
-                    status = max(status, 1)
-                    infos[-1] += "(!)"
-
-        # Add performance data for averaged IO
-        if average_range != None:
-            perfdata = [ perfdata[0], perfdata[2], perfdata[1], perfdata[3] ]
-
-        countername = "disk.%s" % item
-        # Process IOs when available
-        ios_per_sec = None
-        timedif, ios_per_sec = get_counter(countername + ".ios-" + disk['name'], this_time, disk['iops'])
-        disk['iops'] = ios_per_sec
-        infos.append("IOPs-%s: %.2f/sec" % (disk['name'], ios_per_sec))
-
-        perfdata.append(("ios-" + disk['name'], ios_per_sec))
-
-        # Do ioLatency computation if this information is available:
-        timedif, timems_per_sec = get_counter(countername + ".time-" + disk['name'], this_time, disk['ioLatency'])
-        if not ios_per_sec:
-            ioLatency = 0.0
+        if not disk['iops']:
             disk['ioLatency'] = 0.0
         else:
-            ioLatency = timems_per_sec / ios_per_sec
-            disk['ioLatency']  = ioLatency
-        infos.append("ioLatency-%s: %.2fms" % (disk['name'], ioLatency))
-        if "ioLatency" in params:
-            warn, crit = params["ioLatency"]
-            if ioLatency >= crit:
-                status = 2
-                infos[-1] += "(!!)"
-            elif ioLatency >= warn:
-                status = max(status, 1)
-                infos[-1] += "(!)"
-        else:
-            warn, crit = None, None
+            disk['ioLatency']  = disk['ioLatency'] / disk['iops']
 
-        perfdata.append(("ioLatency-" + disk['name'], ioLatency))
+        infos.append("%s ms of %s" % (disk['ioLatency'], 'ioLatency'))
+        infos.append("ioLatency-%s: %.2fms" % (disk['name'], disk['ioLatency']))
+        infos.append(";;;")
     disks.update_device(disks=disks_get)
 
     return ((status, nagios_state_names[status] + " - " + ", ".join(infos) , perfdata), disks)
